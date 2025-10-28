@@ -33,6 +33,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Create API token for Sanctum
+        $user = Auth::user();
+        $token = $user->createToken('web-app')->plainTextToken;
+
+        // Store token in session for Inertia to share
+        session(['api_token' => $token]);
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
@@ -41,6 +48,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Revoke all tokens for the user
+        if (Auth::check()) {
+            Auth::user()->tokens()->delete();
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

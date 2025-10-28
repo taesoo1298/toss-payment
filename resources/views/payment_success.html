@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>결제 완료</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                max-width: 600px;
+                margin: 50px auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+            }
+            .card {
+                background: white;
+                padding: 40px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }
+            .icon {
+                font-size: 64px;
+                margin-bottom: 20px;
+            }
+            h1 {
+                color: #28a745;
+                margin-bottom: 20px;
+            }
+            .info {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+                text-align: left;
+            }
+            .info-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+            .info-row:last-child {
+                border-bottom: none;
+            }
+            .label {
+                color: #6c757d;
+                font-weight: 500;
+            }
+            .value {
+                color: #212529;
+                font-weight: 600;
+            }
+            .btn {
+                display: inline-block;
+                padding: 12px 30px;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 10px;
+                font-weight: 500;
+            }
+            .btn:hover {
+                background-color: #0056b3;
+            }
+            .btn-secondary {
+                background-color: #6c757d;
+            }
+            .btn-secondary:hover {
+                background-color: #5a6268;
+            }
+            .loading {
+                text-align: center;
+                padding: 40px;
+            }
+            .spinner {
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #007bff;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+            }
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+            .error {
+                color: #dc3545;
+                padding: 20px;
+                background: #f8d7da;
+                border-radius: 5px;
+                margin: 20px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>결제를 확인하는 중입니다...</p>
+            </div>
+
+            <div id="success" style="display: none">
+                <div class="icon">✅</div>
+                <h1>결제가 완료되었습니다</h1>
+                <p>결제가 정상적으로 처리되었습니다.</p>
+
+                <div class="info" id="payment-info"></div>
+
+                <div>
+                    <a href="/orders" class="btn">주문 내역 보기</a>
+                    <a href="/" class="btn btn-secondary">홈으로</a>
+                </div>
+            </div>
+
+            <div id="error" style="display: none">
+                <div class="icon">❌</div>
+                <h1 style="color: #dc3545">결제 확인 실패</h1>
+                <div class="error" id="error-message"></div>
+                <a href="/" class="btn btn-secondary">홈으로</a>
+            </div>
+        </div>
+
+        <script>
+            // Configuration
+            const API_BASE_URL = "http://localhost:8000/api";
+            const AUTH_TOKEN = "your-auth-token"; // 실제 인증 토큰
+
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentKey = urlParams.get("paymentKey");
+            const orderId = urlParams.get("orderId");
+            const amount = urlParams.get("amount");
+
+            // Format currency
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat("ko-KR", {
+                    style: "currency",
+                    currency: "KRW",
+                }).format(amount);
+            }
+
+            // Format date
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return new Intl.DateTimeFormat("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                }).format(date);
+            }
+
+            // Confirm payment
+            async function confirmPayment() {
+                try {
+                    console.log("결제 승인 요청:", {
+                        paymentKey,
+                        orderId,
+                        amount,
+                    });
+
+                    const response = await fetch(
+                        `${API_BASE_URL}/payments/confirm`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${AUTH_TOKEN}`,
+                                Accept: "application/json",
+                            },
+                            body: JSON.stringify({
+                                payment_key: paymentKey,
+                                order_id: orderId,
+                                amount: parseInt(amount),
+                            }),
+                        }
+                    );
+
+                    const result = await response.json();
+
+                    if (!response.ok || !result.success) {
+                        throw new Error(
+                            result.message || "결제 승인에 실패했습니다."
+                        );
+                    }
+
+                    console.log("결제 승인 성공:", result.data);
+
+                    // Show success
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("success").style.display = "block";
+
+                    // Display payment info
+                    const payment = result.data;
+                    const infoHtml = `
+                    <div class="info-row">
+                        <span class="label">주문번호</span>
+                        <span class="value">${payment.order_id}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">상품명</span>
+                        <span class="value">${payment.order_name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">결제 금액</span>
+                        <span class="value">${formatCurrency(
+                            payment.amounts.total
+                        )}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">결제 수단</span>
+                        <span class="value">${payment.method.label}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">결제 시각</span>
+                        <span class="value">${formatDate(
+                            payment.approved_at
+                        )}</span>
+                    </div>
+                `;
+                    document.getElementById("payment-info").innerHTML =
+                        infoHtml;
+
+                    // Show receipt link if available
+                    if (payment.receipt_url) {
+                        const receiptBtn = document.createElement("a");
+                        receiptBtn.href = payment.receipt_url;
+                        receiptBtn.target = "_blank";
+                        receiptBtn.className = "btn";
+                        receiptBtn.textContent = "영수증 보기";
+                        document
+                            .querySelector("#success > div:last-child")
+                            .prepend(receiptBtn);
+                    }
+                } catch (error) {
+                    console.error("결제 승인 오류:", error);
+
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("error").style.display = "block";
+                    document.getElementById("error-message").textContent =
+                        error.message || "결제 확인 중 오류가 발생했습니다.";
+                }
+            }
+
+            // Execute on page load
+            if (paymentKey && orderId && amount) {
+                confirmPayment();
+            } else {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("error").style.display = "block";
+                document.getElementById("error-message").textContent =
+                    "결제 정보가 올바르지 않습니다.";
+            }
+        </script>
+    </body>
+</html>

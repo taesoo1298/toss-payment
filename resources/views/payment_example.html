@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Toss Payments 결제 예제</title>
+        <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                max-width: 600px;
+                margin: 50px auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+            }
+            .card {
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                color: #333;
+                margin-bottom: 30px;
+            }
+            .form-group {
+                margin-bottom: 20px;
+            }
+            label {
+                display: block;
+                margin-bottom: 8px;
+                color: #555;
+                font-weight: 500;
+            }
+            input,
+            select {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            input:focus,
+            select:focus {
+                outline: none;
+                border-color: #007bff;
+            }
+            .btn {
+                width: 100%;
+                padding: 15px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            .btn:hover {
+                background-color: #0056b3;
+            }
+            .btn:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+            .error {
+                color: #dc3545;
+                font-size: 14px;
+                margin-top: 5px;
+            }
+            .success {
+                color: #28a745;
+                font-size: 14px;
+                margin-top: 5px;
+            }
+            .loading {
+                text-align: center;
+                padding: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>🚀 Toss Payments 결제</h1>
+
+            <form id="payment-form">
+                <div class="form-group">
+                    <label for="order_name">상품명</label>
+                    <input
+                        type="text"
+                        id="order_name"
+                        name="order_name"
+                        value="테스트 상품"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">결제 금액 (원)</label>
+                    <input
+                        type="number"
+                        id="amount"
+                        name="amount"
+                        value="10000"
+                        min="100"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="method">결제 수단</label>
+                    <select id="method" name="method" required>
+                        <option value="card">카드</option>
+                        <option value="virtual_account">가상계좌</option>
+                        <option value="transfer">계좌이체</option>
+                        <option value="mobile_phone">휴대폰</option>
+                        <option value="easy_pay">간편결제</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="customer_name">구매자명</label>
+                    <input
+                        type="text"
+                        id="customer_name"
+                        name="customer_name"
+                        value="홍길동"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="customer_email">이메일</label>
+                    <input
+                        type="email"
+                        id="customer_email"
+                        name="customer_email"
+                        value="test@example.com"
+                        required
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="customer_mobile_phone">휴대폰 번호</label>
+                    <input
+                        type="tel"
+                        id="customer_mobile_phone"
+                        name="customer_mobile_phone"
+                        value="01012345678"
+                        pattern="01[0-9]{8,9}"
+                        placeholder="01012345678"
+                    />
+                </div>
+
+                <button type="submit" class="btn" id="payment-button">
+                    결제하기
+                </button>
+
+                <div id="message"></div>
+            </form>
+        </div>
+
+        <script>
+            // Configuration
+            const API_BASE_URL = "http://localhost:8000/api";
+            const TOSS_CLIENT_KEY = "test_ck_xxxxxxxxxx"; // 여기에 실제 클라이언트 키 입력
+            const AUTH_TOKEN = "your-auth-token"; // 실제 인증 토큰
+
+            // DOM Elements
+            const form = document.getElementById("payment-form");
+            const button = document.getElementById("payment-button");
+            const messageEl = document.getElementById("message");
+
+            // Show message
+            function showMessage(message, type = "error") {
+                messageEl.textContent = message;
+                messageEl.className = type;
+            }
+
+            // Clear message
+            function clearMessage() {
+                messageEl.textContent = "";
+                messageEl.className = "";
+            }
+
+            // Handle form submission
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                clearMessage();
+
+                button.disabled = true;
+                button.textContent = "처리 중...";
+
+                try {
+                    // Step 1: Prepare payment
+                    const formData = new FormData(form);
+                    const paymentData = {
+                        order_name: formData.get("order_name"),
+                        amount: parseInt(formData.get("amount")),
+                        method: formData.get("method"),
+                        customer_name: formData.get("customer_name"),
+                        customer_email: formData.get("customer_email"),
+                        customer_mobile_phone: formData.get(
+                            "customer_mobile_phone"
+                        ),
+                    };
+
+                    console.log("결제 준비 요청:", paymentData);
+
+                    const prepareResponse = await fetch(
+                        `${API_BASE_URL}/payments/prepare`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${AUTH_TOKEN}`,
+                                Accept: "application/json",
+                            },
+                            body: JSON.stringify(paymentData),
+                        }
+                    );
+
+                    if (!prepareResponse.ok) {
+                        throw new Error("결제 준비 실패");
+                    }
+
+                    const { data } = await prepareResponse.json();
+                    console.log("결제 준비 완료:", data);
+
+                    // Step 2: Load Toss Payments SDK
+                    const tossPayments = await loadTossPayments(
+                        TOSS_CLIENT_KEY
+                    );
+
+                    // Step 3: Request payment
+                    const methodMap = {
+                        card: "카드",
+                        virtual_account: "가상계좌",
+                        transfer: "계좌이체",
+                        mobile_phone: "휴대폰",
+                        easy_pay: "간편결제",
+                    };
+
+                    await tossPayments.requestPayment(
+                        methodMap[data.method] || "카드",
+                        {
+                            amount: data.amount,
+                            orderId: data.order_id,
+                            orderName: data.order_name,
+                            customerName: data.customer_name,
+                            customerEmail: data.customer_email,
+                            successUrl:
+                                window.location.origin +
+                                "/payments/success.html",
+                            failUrl:
+                                window.location.origin + "/payments/fail.html",
+                        }
+                    );
+                } catch (error) {
+                    console.error("결제 오류:", error);
+                    showMessage(
+                        error.message || "결제 처리 중 오류가 발생했습니다.",
+                        "error"
+                    );
+                    button.disabled = false;
+                    button.textContent = "결제하기";
+                }
+            });
+
+            // For testing without authentication
+            if (!AUTH_TOKEN || AUTH_TOKEN === "your-auth-token") {
+                console.warn(
+                    "⚠️ 인증 토큰이 설정되지 않았습니다. 실제 사용 시 인증 토큰을 설정해주세요."
+                );
+            }
+        </script>
+    </body>
+</html>

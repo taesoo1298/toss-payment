@@ -7,10 +7,12 @@
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="preload" href="{{ asset('fonts/inter/inter-latin-400-normal.woff2') }}" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="{{ asset('fonts/inter/inter-latin-500-normal.woff2') }}" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="{{ asset('fonts/instrument-sans/instrument-sans-latin-400-normal.woff2') }}" as="font" type="font/woff2" crossorigin />
 
         <!-- Scripts -->
+        <script src="https://js.tosspayments.com/v2/standard"></script>
         @routes
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
