@@ -59,7 +59,7 @@ export default function Header({ user }: HeaderProps) {
                                     </Link>
                                 </Button>
                                 <Button variant="ghost" asChild>
-                                    <Link href="/dashboard">
+                                    <Link href="/mypage">
                                         <User className="h-5 w-5 mr-2" />
                                         {user.name}
                                     </Link>
@@ -86,14 +86,17 @@ export default function Header({ user }: HeaderProps) {
             <nav className="border-t">
                 <div className="container mx-auto px-4">
                     <div className="flex items-center gap-8 py-3 overflow-x-auto">
-                        <Link href="/" className="text-sm font-medium hover:text-primary whitespace-nowrap">
+                        <Link href="/products" className="text-sm font-medium hover:text-primary whitespace-nowrap">
                             전체상품
                         </Link>
                         <Link href="/category/whitening" className="text-sm font-medium hover:text-primary whitespace-nowrap">
                             미백케어
                         </Link>
-                        <Link href="/category/sensitive" className="text-sm font-medium hover:text-primary whitespace-nowrap">
+                        <Link href="/category/gum" className="text-sm font-medium hover:text-primary whitespace-nowrap">
                             잇몸케어
+                        </Link>
+                        <Link href="/category/sensitive" className="text-sm font-medium hover:text-primary whitespace-nowrap">
+                            민감치아
                         </Link>
                         <Link href="/category/kids" className="text-sm font-medium hover:text-primary whitespace-nowrap">
                             어린이용
@@ -101,11 +104,11 @@ export default function Header({ user }: HeaderProps) {
                         <Link href="/category/herbal" className="text-sm font-medium hover:text-primary whitespace-nowrap">
                             한방치약
                         </Link>
+                        <Link href="/category/total" className="text-sm font-medium hover:text-primary whitespace-nowrap">
+                            토탈케어
+                        </Link>
                         <Link href="/category/gift" className="text-sm font-medium hover:text-primary whitespace-nowrap">
                             선물세트
-                        </Link>
-                        <Link href="/deals" className="text-sm font-medium text-destructive hover:text-destructive/80 whitespace-nowrap">
-                            특가할인
                         </Link>
                     </div>
                 </div>

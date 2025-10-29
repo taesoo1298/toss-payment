@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -49,6 +49,11 @@ export default function Success({ paymentKey, orderId, amount }: SuccessProps) {
                 }
 
                 setPaymentData(response.data.data);
+
+                // Redirect to order complete page after successful confirmation
+                setTimeout(() => {
+                    router.visit(`/order/complete?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`);
+                }, 1500);
             } catch (err: any) {
                 console.error('결제 승인 오류:', err);
                 setError(

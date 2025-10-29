@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle2, ShoppingBag, Truck, CreditCard } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle, CheckCircle2, ShoppingBag, Truck, CreditCard, Ticket, Calendar, MapPin, Home, Building } from "lucide-react";
 import { PageProps } from "@/types";
 
 // Declare TossPayments global from CDN
@@ -22,6 +24,30 @@ interface OrderItem {
     price: number;
     quantity: number;
     image: string;
+}
+
+interface Coupon {
+    id: string;
+    code: string;
+    name: string;
+    description: string;
+    discountType: "percentage" | "fixed";
+    discountValue: number;
+    minPurchaseAmount: number;
+    maxDiscountAmount?: number;
+    expiryDate: string;
+}
+
+interface Address {
+    id: string;
+    name: string;
+    recipient: string;
+    phone: string;
+    postalCode: string;
+    address: string;
+    addressDetail: string;
+    isDefault: boolean;
+    type: "home" | "office" | "etc";
 }
 
 interface CheckoutProps extends PageProps {
@@ -50,10 +76,96 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
         },
     ];
 
+    // Mock available coupons
+    const availableCoupons: Coupon[] = [
+        {
+            id: "1",
+            code: "WELCOME10",
+            name: "신규회원 10% 할인",
+            description: "첫 구매 시 10% 할인 혜택",
+            discountType: "percentage",
+            discountValue: 10,
+            minPurchaseAmount: 0,
+            maxDiscountAmount: 5000,
+            expiryDate: "2025-12-31",
+        },
+        {
+            id: "2",
+            code: "SMILE5000",
+            name: "5,000원 즉시 할인",
+            description: "30,000원 이상 구매 시 사용 가능",
+            discountType: "fixed",
+            discountValue: 5000,
+            minPurchaseAmount: 30000,
+            expiryDate: "2025-11-30",
+        },
+        {
+            id: "3",
+            code: "BIRTHDAY20",
+            name: "생일 축하 20% 할인",
+            description: "생일 축하 특별 할인 쿠폰",
+            discountType: "percentage",
+            discountValue: 20,
+            minPurchaseAmount: 20000,
+            maxDiscountAmount: 10000,
+            expiryDate: "2025-11-15",
+        },
+    ];
+
+    // Mock saved addresses
+    const savedAddresses: Address[] = [
+        {
+            id: "1",
+            name: "우리집",
+            recipient: "홍길동",
+            phone: "010-1234-5678",
+            postalCode: "06234",
+            address: "서울특별시 강남구 테헤란로 123",
+            addressDetail: "456호",
+            isDefault: true,
+            type: "home",
+        },
+        {
+            id: "2",
+            name: "회사",
+            recipient: "홍길동",
+            phone: "010-1234-5678",
+            postalCode: "06789",
+            address: "서울특별시 서초구 강남대로 456",
+            addressDetail: "7층 701호",
+            isDefault: false,
+            type: "office",
+        },
+    ];
+
+    const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
+    const [couponDialogOpen, setCouponDialogOpen] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState<Address | null>(
+        savedAddresses.find(addr => addr.isDefault) || null
+    );
+    const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+
     const productTotal = mockItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const shippingFee = productTotal >= 30000 ? 0 : 3000;
-    const finalTotal = productTotal + shippingFee;
 
+    // Calculate coupon discount
+    const couponDiscount = selectedCoupon ? (() => {
+        if (productTotal < selectedCoupon.minPurchaseAmount) {
+            return 0;
+        }
+        if (selectedCoupon.discountType === "percentage") {
+            const discount = Math.floor(productTotal * (selectedCoupon.discountValue / 100));
+            return selectedCoupon.maxDiscountAmount
+                ? Math.min(discount, selectedCoupon.maxDiscountAmount)
+                : discount;
+        } else {
+            return selectedCoupon.discountValue;
+        }
+    })() : 0;
+
+    const finalTotal = productTotal + shippingFee - couponDiscount;
+
+    const defaultAddress = savedAddresses.find(addr => addr.isDefault);
     const [formData, setFormData] = useState({
         // 주문자 정보
         customer_name: user?.name || "",
@@ -61,11 +173,11 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
         customer_mobile_phone: "",
 
         // 배송 정보
-        recipient_name: user?.name || "",
-        recipient_phone: "",
-        postal_code: "",
-        address: "",
-        address_detail: "",
+        recipient_name: defaultAddress?.recipient || user?.name || "",
+        recipient_phone: defaultAddress?.phone || "",
+        postal_code: defaultAddress?.postalCode || "",
+        address: defaultAddress?.address || "",
+        address_detail: defaultAddress?.addressDetail || "",
         delivery_message: "",
 
         // 주문 정보
@@ -155,6 +267,51 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
             style: 'currency',
             currency: 'KRW',
         }).format(price);
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat("ko-KR", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+        }).format(date);
+    };
+
+    const getDiscountText = (coupon: Coupon) => {
+        if (coupon.discountType === "percentage") {
+            return `${coupon.discountValue}%`;
+        } else {
+            return formatPrice(coupon.discountValue);
+        }
+    };
+
+    const canUseCoupon = (coupon: Coupon) => {
+        return productTotal >= coupon.minPurchaseAmount;
+    };
+
+    const handleSelectCoupon = (coupon: Coupon) => {
+        if (canUseCoupon(coupon)) {
+            setSelectedCoupon(coupon);
+            setCouponDialogOpen(false);
+        }
+    };
+
+    const handleRemoveCoupon = () => {
+        setSelectedCoupon(null);
+    };
+
+    const handleSelectAddress = (address: Address) => {
+        setSelectedAddress(address);
+        setFormData(prev => ({
+            ...prev,
+            recipient_name: address.recipient,
+            recipient_phone: address.phone,
+            postal_code: address.postalCode,
+            address: address.address,
+            address_detail: address.addressDetail,
+        }));
+        setAddressDialogOpen(false);
     };
 
     const handleSubmit: FormEventHandler = async (e) => {
@@ -319,10 +476,34 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
                                     {/* 배송 정보 */}
                                     <Card>
                                         <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <Truck className="h-5 w-5" />
-                                                배송 정보
-                                            </CardTitle>
+                                            <div className="flex items-center justify-between">
+                                                <CardTitle className="flex items-center gap-2">
+                                                    <Truck className="h-5 w-5" />
+                                                    배송 정보
+                                                </CardTitle>
+                                                {savedAddresses.length > 0 && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setAddressDialogOpen(true)}
+                                                    >
+                                                        <MapPin className="h-4 w-4 mr-2" />
+                                                        배송지 선택
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            {selectedAddress && (
+                                                <div className="mt-3 p-3 bg-primary/10 rounded-lg text-sm">
+                                                    <div className="font-medium text-primary flex items-center gap-2 mb-1">
+                                                        <CheckCircle2 className="h-4 w-4" />
+                                                        선택된 배송지: {selectedAddress.name}
+                                                    </div>
+                                                    <div className="text-muted-foreground">
+                                                        {selectedAddress.address} {selectedAddress.addressDetail}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -414,6 +595,155 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
                                         </CardContent>
                                     </Card>
 
+                                    {/* 쿠폰 선택 */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <Ticket className="h-5 w-5" />
+                                                할인 쿠폰
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {selectedCoupon ? (
+                                                <div className="border rounded-lg p-4 bg-gradient-to-r from-primary/10 to-cyan-500/10">
+                                                    <div className="flex items-start justify-between mb-3">
+                                                        <div>
+                                                            <div className="font-semibold text-lg mb-1">
+                                                                {selectedCoupon.name}
+                                                            </div>
+                                                            <div className="text-sm text-muted-foreground">
+                                                                {selectedCoupon.description}
+                                                            </div>
+                                                        </div>
+                                                        <Badge className="bg-primary">
+                                                            {getDiscountText(selectedCoupon)} 할인
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="text-sm text-muted-foreground">
+                                                            할인 금액: {formatPrice(couponDiscount)}
+                                                        </div>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={handleRemoveCoupon}
+                                                        >
+                                                            쿠폰 제거
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <Dialog open={couponDialogOpen} onOpenChange={setCouponDialogOpen}>
+                                                    <DialogTrigger asChild>
+                                                        <Button type="button" variant="outline" className="w-full">
+                                                            <Ticket className="h-4 w-4 mr-2" />
+                                                            쿠폰 선택하기 ({availableCoupons.length}장 사용 가능)
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                                                        <DialogHeader>
+                                                            <DialogTitle>쿠폰 선택</DialogTitle>
+                                                        </DialogHeader>
+                                                        <div className="space-y-3 mt-4">
+                                                            {availableCoupons.length === 0 ? (
+                                                                <div className="text-center py-12">
+                                                                    <Ticket className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                                                                    <p className="text-muted-foreground">
+                                                                        사용 가능한 쿠폰이 없습니다
+                                                                    </p>
+                                                                    <Button
+                                                                        variant="link"
+                                                                        className="mt-2"
+                                                                        asChild
+                                                                    >
+                                                                        <Link href="/mypage/coupons">
+                                                                            쿠폰 등록하러 가기
+                                                                        </Link>
+                                                                    </Button>
+                                                                </div>
+                                                            ) : (
+                                                                availableCoupons.map((coupon) => {
+                                                                    const isAvailable = canUseCoupon(coupon);
+                                                                    return (
+                                                                        <div
+                                                                            key={coupon.id}
+                                                                            className={`border rounded-lg overflow-hidden ${
+                                                                                !isAvailable ? "opacity-50" : ""
+                                                                            }`}
+                                                                        >
+                                                                            <div className="flex">
+                                                                                <div className="bg-gradient-to-br from-primary to-cyan-500 text-primary-foreground p-6 flex items-center justify-center min-w-[120px]">
+                                                                                    <div className="text-center">
+                                                                                        <Ticket className="h-6 w-6 mx-auto mb-2" />
+                                                                                        <div className="text-2xl font-bold">
+                                                                                            {getDiscountText(coupon)}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="flex-1 p-4">
+                                                                                    <div className="font-semibold mb-1">
+                                                                                        {coupon.name}
+                                                                                    </div>
+                                                                                    <div className="text-sm text-muted-foreground mb-2">
+                                                                                        {coupon.description}
+                                                                                    </div>
+                                                                                    <div className="text-xs text-muted-foreground space-y-1">
+                                                                                        {coupon.minPurchaseAmount > 0 && (
+                                                                                            <div>
+                                                                                                • 최소 주문금액:{" "}
+                                                                                                {formatPrice(
+                                                                                                    coupon.minPurchaseAmount
+                                                                                                )}
+                                                                                            </div>
+                                                                                        )}
+                                                                                        {coupon.maxDiscountAmount && (
+                                                                                            <div>
+                                                                                                • 최대 할인금액:{" "}
+                                                                                                {formatPrice(
+                                                                                                    coupon.maxDiscountAmount
+                                                                                                )}
+                                                                                            </div>
+                                                                                        )}
+                                                                                        <div className="flex items-center gap-1">
+                                                                                            <Calendar className="h-3 w-3" />
+                                                                                            {formatDate(coupon.expiryDate)}까지
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    {!isAvailable && (
+                                                                                        <div className="mt-2 text-xs text-destructive">
+                                                                                            최소 주문금액 미달 (
+                                                                                            {formatPrice(
+                                                                                                coupon.minPurchaseAmount -
+                                                                                                    productTotal
+                                                                                            )}{" "}
+                                                                                            부족)
+                                                                                        </div>
+                                                                                    )}
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        size="sm"
+                                                                                        className="mt-3"
+                                                                                        disabled={!isAvailable}
+                                                                                        onClick={() =>
+                                                                                            handleSelectCoupon(coupon)
+                                                                                        }
+                                                                                    >
+                                                                                        {isAvailable ? "적용하기" : "사용불가"}
+                                                                                    </Button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })
+                                                            )}
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+
                                     {/* 결제 수단 */}
                                     <Card>
                                         <CardHeader>
@@ -464,6 +794,17 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
                                                     {shippingFee === 0 ? '무료' : formatPrice(shippingFee)}
                                                 </span>
                                             </div>
+                                            {couponDiscount > 0 && (
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-muted-foreground flex items-center gap-1">
+                                                        <Ticket className="h-3 w-3" />
+                                                        쿠폰 할인
+                                                    </span>
+                                                    <span className="font-medium text-destructive">
+                                                        -{formatPrice(couponDiscount)}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="flex justify-between items-center pt-2">
@@ -472,6 +813,17 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
                                                 {formatPrice(finalTotal)}
                                             </span>
                                         </div>
+
+                                        {selectedCoupon && (
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
+                                                <div className="flex items-center gap-2 text-green-900">
+                                                    <CheckCircle2 className="h-4 w-4" />
+                                                    <span className="font-medium">
+                                                        쿠폰 적용: {formatPrice(couponDiscount)} 할인!
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
                                             <div className="font-medium text-blue-900 mb-2">결제 안내</div>
@@ -488,6 +840,111 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Address Selection Dialog */}
+            <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>배송지 선택</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3 mt-4">
+                        {savedAddresses.length === 0 ? (
+                            <div className="text-center py-12">
+                                <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                                <p className="text-muted-foreground mb-4">
+                                    등록된 배송지가 없습니다
+                                </p>
+                                <Button variant="link" asChild>
+                                    <Link href="/mypage/addresses">
+                                        배송지 관리로 이동
+                                    </Link>
+                                </Button>
+                            </div>
+                        ) : (
+                            savedAddresses.map((address) => {
+                                const isSelected = selectedAddress?.id === address.id;
+                                const getTypeIcon = (type: Address["type"]) => {
+                                    switch (type) {
+                                        case "home":
+                                            return <Home className="h-4 w-4" />;
+                                        case "office":
+                                            return <Building className="h-4 w-4" />;
+                                        default:
+                                            return <MapPin className="h-4 w-4" />;
+                                    }
+                                };
+
+                                return (
+                                    <Card
+                                        key={address.id}
+                                        className={`cursor-pointer transition-all ${
+                                            isSelected
+                                                ? "border-primary bg-primary/5"
+                                                : "hover:bg-muted/50"
+                                        }`}
+                                        onClick={() => handleSelectAddress(address)}
+                                    >
+                                        <CardContent className="p-4">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    {getTypeIcon(address.type)}
+                                                    <h3 className="font-semibold">
+                                                        {address.name}
+                                                    </h3>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    {address.isDefault && (
+                                                        <Badge variant="outline" className="text-xs">
+                                                            기본
+                                                        </Badge>
+                                                    )}
+                                                    {isSelected && (
+                                                        <Badge className="bg-primary">
+                                                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                                                            선택됨
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1 text-sm">
+                                                <div>
+                                                    <span className="text-muted-foreground">받는 사람: </span>
+                                                    <span className="font-medium">{address.recipient}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-muted-foreground">연락처: </span>
+                                                    <span className="font-medium">{address.phone}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-muted-foreground">주소: </span>
+                                                    <span className="font-medium">
+                                                        [{address.postalCode}] {address.address}{" "}
+                                                        {address.addressDetail}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })
+                        )}
+
+                        <div className="pt-4 border-t">
+                            <Button
+                                variant="outline"
+                                className="w-full"
+                                asChild
+                            >
+                                <Link href="/mypage/addresses">
+                                    <MapPin className="h-4 w-4 mr-2" />
+                                    배송지 관리
+                                </Link>
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

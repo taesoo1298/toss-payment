@@ -4,7 +4,17 @@ import Header from "@/Components/Header";
 import ProductCard from "@/Components/ProductCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
     Star,
     ShoppingCart,
@@ -26,6 +36,16 @@ interface ProductDetailProps extends PageProps {
     relatedProducts: Product[];
 }
 
+interface Review {
+    id: number;
+    userName: string;
+    rating: number;
+    date: string;
+    content: string;
+    images?: string[];
+    verified: boolean;
+}
+
 export default function ProductDetail({
     auth,
     product,
@@ -33,6 +53,10 @@ export default function ProductDetail({
 }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
+    const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewContent, setReviewContent] = useState("");
+    const [reviewImages, setReviewImages] = useState<string[]>([]);
 
     // Mock product data (실제로는 백엔드에서 받아옴)
     const mockProduct: Product = product || {
@@ -125,9 +149,80 @@ export default function ProductDetail({
         alert(`${mockProduct.name} ${quantity}개가 장바구니에 담겼습니다.`);
     };
 
+    // Mock reviews data
+    const mockReviews: Review[] = [
+        {
+            id: 1,
+            userName: "김*연",
+            rating: 5,
+            date: "2025-10-25",
+            content:
+                "정말 효과가 좋아요! 일주일 사용했는데 이미 치아가 밝아진 느낌이에요. 민감한 치아인데도 전혀 시리지 않아서 좋습니다.",
+            images: [
+                "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=200&q=80",
+                "https://images.unsplash.com/photo-1609840114035-3c981407e31f?w=200&q=80",
+            ],
+            verified: true,
+        },
+        {
+            id: 2,
+            userName: "이*수",
+            rating: 4,
+            date: "2025-10-20",
+            content:
+                "미백 효과는 확실히 있는 것 같아요. 다만 가격이 조금 비싼 편이라 별 하나 뺐습니다. 그래도 재구매 의향 있습니다!",
+            verified: true,
+        },
+        {
+            id: 3,
+            userName: "박*민",
+            rating: 5,
+            date: "2025-10-15",
+            content:
+                "치과의사가 만든 제품이라 믿고 샀는데 역시 실망시키지 않네요. 향도 좋고 거품도 적당해요. 강추합니다!",
+            images: [
+                "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=200&q=80",
+            ],
+            verified: true,
+        },
+    ];
+
+    const handleSubmitReview = () => {
+        if (!reviewContent.trim()) {
+            alert("리뷰 내용을 입력해주세요.");
+            return;
+        }
+
+        // Mock review submission
+        alert(
+            `리뷰가 등록되었습니다!\n평점: ${reviewRating}점\n내용: ${reviewContent}`
+        );
+
+        // Reset form
+        setReviewDialogOpen(false);
+        setReviewRating(5);
+        setReviewContent("");
+        setReviewImages([]);
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files) {
+            // Mock image upload - 실제로는 서버에 업로드
+            const newImages = Array.from(files).map((file) =>
+                URL.createObjectURL(file)
+            );
+            setReviewImages((prev) => [...prev, ...newImages].slice(0, 5)); // 최대 5장
+        }
+    };
+
+    const removeReviewImage = (index: number) => {
+        setReviewImages((prev) => prev.filter((_, i) => i !== index));
+    };
+
     const handleBuyNow = () => {
         // 바로 구매 로직 (결제 페이지로 이동)
-        router.visit("/payments/create", {
+        router.visit("/checkout", {
             method: "get",
             data: {
                 productId: mockProduct.id,
@@ -614,40 +709,35 @@ export default function ProductDetail({
                                                     개의 리뷰
                                                 </div>
                                             </div>
-                                            <Button>리뷰 작성</Button>
+                                            <Button
+                                                onClick={() =>
+                                                    setReviewDialogOpen(true)
+                                                }
+                                            >
+                                                리뷰 작성
+                                            </Button>
                                         </div>
 
-                                        {/* Sample Reviews */}
-                                        {[
-                                            {
-                                                author: "김**",
-                                                rating: 5,
-                                                date: "2025.01.15",
-                                                content:
-                                                    "정말 효과가 좋아요! 2주 사용했는데 눈에 띄게 하얘졌어요. 시린 증상도 없고 만족합니다.",
-                                            },
-                                            {
-                                                author: "이**",
-                                                rating: 5,
-                                                date: "2025.01.12",
-                                                content:
-                                                    "치과의사가 만든 제품이라 믿고 샀는데 역시 다르네요. 가격은 좀 있지만 그만한 가치가 있습니다.",
-                                            },
-                                            {
-                                                author: "박**",
-                                                rating: 4,
-                                                date: "2025.01.10",
-                                                content:
-                                                    "미백 효과는 확실히 있는데 좀 더 빨리 효과가 나타났으면 좋겠어요. 그래도 만족해요!",
-                                            },
-                                        ].map((review, index) => (
-                                            <Card key={index}>
+                                        {/* Reviews List */}
+                                        {mockReviews.map((review) => (
+                                            <Card key={review.id}>
                                                 <CardContent className="p-6">
                                                     <div className="flex items-center justify-between mb-3">
                                                         <div className="flex items-center gap-3">
                                                             <span className="font-semibold">
-                                                                {review.author}
+                                                                {
+                                                                    review.userName
+                                                                }
                                                             </span>
+                                                            {review.verified && (
+                                                                <Badge
+                                                                    variant="outline"
+                                                                    className="text-xs bg-green-50 text-green-700 border-green-200"
+                                                                >
+                                                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                                                    구매확인
+                                                                </Badge>
+                                                            )}
                                                             <div className="flex">
                                                                 {[
                                                                     ...Array(5),
@@ -672,7 +762,41 @@ export default function ProductDetail({
                                                             {review.date}
                                                         </span>
                                                     </div>
-                                                    <p>{review.content}</p>
+                                                    <p className="mb-3">
+                                                        {review.content}
+                                                    </p>
+                                                    {review.images &&
+                                                        review.images.length >
+                                                            0 && (
+                                                            <div className="flex gap-2 mt-3">
+                                                                {review.images.map(
+                                                                    (
+                                                                        image,
+                                                                        idx
+                                                                    ) => (
+                                                                        <img
+                                                                            key={
+                                                                                idx
+                                                                            }
+                                                                            src={
+                                                                                image
+                                                                            }
+                                                                            alt={`리뷰 이미지 ${
+                                                                                idx +
+                                                                                1
+                                                                            }`}
+                                                                            className="w-20 h-20 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
+                                                                            onClick={() =>
+                                                                                window.open(
+                                                                                    image,
+                                                                                    "_blank"
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        )}
                                                 </CardContent>
                                             </Card>
                                         ))}
@@ -703,6 +827,167 @@ export default function ProductDetail({
                         </section>
                     </div>
                 </div>
+
+                {/* Review Write Dialog */}
+                <Dialog
+                    open={reviewDialogOpen}
+                    onOpenChange={setReviewDialogOpen}
+                >
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>리뷰 작성</DialogTitle>
+                        </DialogHeader>
+
+                        <div className="space-y-6 py-4">
+                            {/* Rating */}
+                            <div className="space-y-2">
+                                <Label>
+                                    평점{" "}
+                                    <span className="text-destructive">*</span>
+                                </Label>
+                                <div className="flex gap-1">
+                                    {[1, 2, 3, 4, 5].map((rating) => (
+                                        <button
+                                            key={rating}
+                                            type="button"
+                                            onClick={() =>
+                                                setReviewRating(rating)
+                                            }
+                                            className="focus:outline-none transition-transform hover:scale-110"
+                                        >
+                                            <Star
+                                                className={`h-8 w-8 ${
+                                                    rating <= reviewRating
+                                                        ? "fill-yellow-400 text-yellow-400"
+                                                        : "text-gray-300"
+                                                }`}
+                                            />
+                                        </button>
+                                    ))}
+                                    <span className="ml-3 text-lg font-semibold text-yellow-600">
+                                        {reviewRating}.0
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Review Content */}
+                            <div className="space-y-2">
+                                <Label htmlFor="reviewContent">
+                                    리뷰 내용{" "}
+                                    <span className="text-destructive">*</span>
+                                </Label>
+                                <textarea
+                                    id="reviewContent"
+                                    value={reviewContent}
+                                    onChange={(e) =>
+                                        setReviewContent(e.target.value)
+                                    }
+                                    placeholder="상품에 대한 솔직한 리뷰를 남겨주세요. (최소 10자 이상)"
+                                    className="w-full min-h-[150px] px-3 py-2 rounded-md border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    {reviewContent.length}자
+                                </p>
+                            </div>
+
+                            {/* Image Upload */}
+                            <div className="space-y-2">
+                                <Label htmlFor="reviewImages">
+                                    사진 첨부 (선택, 최대 5장)
+                                </Label>
+                                <div className="space-y-3">
+                                    <Input
+                                        id="reviewImages"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={handleImageUpload}
+                                        className="cursor-pointer"
+                                    />
+
+                                    {/* Image Preview */}
+                                    {reviewImages.length > 0 && (
+                                        <div className="flex flex-wrap gap-2">
+                                            {reviewImages.map(
+                                                (image, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="relative"
+                                                    >
+                                                        <img
+                                                            src={image}
+                                                            alt={`미리보기 ${
+                                                                index + 1
+                                                            }`}
+                                                            className="w-20 h-20 object-cover rounded-lg border"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                removeReviewImage(
+                                                                    index
+                                                                )
+                                                            }
+                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
+                                    <p className="text-xs text-muted-foreground">
+                                        상품과 관련된 사진을 첨부하면 다른
+                                        고객에게 더 도움이 됩니다.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Review Guidelines */}
+                            <div className="bg-muted/50 rounded-lg p-4">
+                                <h4 className="font-semibold text-sm mb-2">
+                                    리뷰 작성 가이드
+                                </h4>
+                                <ul className="space-y-1 text-xs text-muted-foreground">
+                                    <li>
+                                        • 상품과 무관한 내용이나 광고성 게시물은
+                                        삭제될 수 있습니다.
+                                    </li>
+                                    <li>
+                                        • 타인의 권리를 침해하거나 명예를
+                                        훼손하는 내용은 금지됩니다.
+                                    </li>
+                                    <li>
+                                        • 작성하신 리뷰는 마이페이지에서 확인 및
+                                        수정할 수 있습니다.
+                                    </li>
+                                    <li>
+                                        • 구매 확인된 리뷰 작성 시 포인트가
+                                        적립됩니다.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setReviewDialogOpen(false);
+                                    setReviewRating(5);
+                                    setReviewContent("");
+                                    setReviewImages([]);
+                                }}
+                            >
+                                취소
+                            </Button>
+                            <Button onClick={handleSubmitReview}>
+                                리뷰 등록
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
                 {/* Footer */}
                 <footer className="bg-background border-t py-12 mt-12">

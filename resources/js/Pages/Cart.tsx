@@ -103,7 +103,7 @@ export default function Cart({ auth }: PageProps) {
             alert('주문할 상품을 선택해주세요.');
             return;
         }
-        router.visit('/payments/create');
+        router.visit('/checkout');
     };
 
     return (
