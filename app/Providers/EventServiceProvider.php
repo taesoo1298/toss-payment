@@ -8,6 +8,7 @@ use App\Events\Payment\PaymentFailed;
 use App\Listeners\Payment\SendPaymentConfirmationEmail;
 use App\Listeners\Payment\UpdateOrderStatus;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -31,6 +32,11 @@ class EventServiceProvider extends ServiceProvider
             // Add listeners for payment cancellation
             // e.g., ProcessRefund::class,
             // e.g., SendCancellationEmail::class,
+        ],
+
+        SocialiteWasCalled::class => [
+            \SocialiteProviders\Kakao\KakaoExtendSocialite::class,
+            \SocialiteProviders\Naver\NaverExtendSocialite::class,
         ],
     ];
 

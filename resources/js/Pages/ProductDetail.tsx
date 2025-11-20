@@ -2,19 +2,19 @@ import { Head, Link, router } from "@inertiajs/react";
 import { PageProps, Product } from "@/types";
 import Header from "@/Components/Header";
 import ProductCard from "@/Components/ProductCard";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import { Badge } from "@/Components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
     DialogFooter,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+} from "@/Components/ui/dialog";
+import { Label } from "@/Components/ui/label";
+import { Input } from "@/Components/ui/input";
 import {
     Star,
     ShoppingCart,

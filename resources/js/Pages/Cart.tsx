@@ -1,9 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { PageProps, Product } from '@/types';
 import Header from '@/Components/Header';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent } from '@/Components/ui/card';
+import { Button } from '@/Components/ui/button';
+import { Checkbox } from '@/Components/ui/checkbox';
 import { X, Plus, Minus, ShoppingBag, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 

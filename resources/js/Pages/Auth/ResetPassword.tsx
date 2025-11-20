@@ -30,11 +30,18 @@ export default function ResetPassword({
 
     return (
         <GuestLayout>
-            <Head title="Reset Password" />
+            <Head title="비밀번호 재설정" />
 
-            <form onSubmit={submit}>
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">비밀번호 재설정</h2>
+                <p className="mt-1 text-sm text-gray-600">
+                    새로운 비밀번호를 입력해주세요
+                </p>
+            </div>
+
+            <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="이메일" />
 
                     <TextInput
                         id="email"
@@ -44,13 +51,15 @@ export default function ResetPassword({
                         className="mt-1 block w-full"
                         autoComplete="username"
                         onChange={(e) => setData('email', e.target.value)}
+                        placeholder="example@email.com"
+                        required
                     />
 
                     <InputError message={errors.email} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                <div>
+                    <InputLabel htmlFor="password" value="새 비밀번호" />
 
                     <TextInput
                         id="password"
@@ -61,18 +70,21 @@ export default function ResetPassword({
                         autoComplete="new-password"
                         isFocused={true}
                         onChange={(e) => setData('password', e.target.value)}
+                        placeholder="8자 이상 입력해주세요"
+                        required
                     />
 
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
+                <div>
                     <InputLabel
                         htmlFor="password_confirmation"
-                        value="Confirm Password"
+                        value="비밀번호 확인"
                     />
 
                     <TextInput
+                        id="password_confirmation"
                         type="password"
                         name="password_confirmation"
                         value={data.password_confirmation}
@@ -81,6 +93,8 @@ export default function ResetPassword({
                         onChange={(e) =>
                             setData('password_confirmation', e.target.value)
                         }
+                        placeholder="비밀번호를 다시 입력해주세요"
+                        required
                     />
 
                     <InputError
@@ -89,11 +103,9 @@ export default function ResetPassword({
                     />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Reset Password
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton className="w-full justify-center" disabled={processing}>
+                    비밀번호 재설정
+                </PrimaryButton>
             </form>
         </GuestLayout>
     );

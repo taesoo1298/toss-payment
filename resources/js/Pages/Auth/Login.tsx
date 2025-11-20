@@ -3,6 +3,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import SocialLoginButton from '@/Components/SocialLoginButton';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -30,17 +31,45 @@ export default function Login({
 
     return (
         <GuestLayout>
-            <Head title="Log in" />
+            <Head title="로그인" />
+
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">로그인</h2>
+                <p className="mt-1 text-sm text-gray-600">
+                    Dr.Smile 계정으로 로그인하세요
+                </p>
+            </div>
 
             {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
+                <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm font-medium text-green-600">
                     {status}
                 </div>
             )}
 
-            <form onSubmit={submit}>
+            {(errors as any).social && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600">
+                    {(errors as any).social}
+                </div>
+            )}
+
+            <div className="space-y-3">
+                <SocialLoginButton provider="google" />
+                <SocialLoginButton provider="kakao" />
+                <SocialLoginButton provider="naver" />
+            </div>
+
+            <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                    <span className="bg-white px-4 text-gray-500">또는 이메일로 계속</span>
+                </div>
+            </div>
+
+            <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="이메일" />
 
                     <TextInput
                         id="email"
@@ -51,13 +80,14 @@ export default function Login({
                         autoComplete="username"
                         isFocused={true}
                         onChange={(e) => setData('email', e.target.value)}
+                        placeholder="example@email.com"
                     />
 
                     <InputError message={errors.email} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                <div>
+                    <InputLabel htmlFor="password" value="비밀번호" />
 
                     <TextInput
                         id="password"
@@ -67,12 +97,13 @@ export default function Login({
                         className="mt-1 block w-full"
                         autoComplete="current-password"
                         onChange={(e) => setData('password', e.target.value)}
+                        placeholder="••••••••"
                     />
 
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="mt-4 block">
+                <div className="flex items-center justify-between">
                     <label className="flex items-center">
                         <Checkbox
                             name="remember"
@@ -85,26 +116,34 @@ export default function Login({
                             }
                         />
                         <span className="ms-2 text-sm text-gray-600">
-                            Remember me
+                            로그인 상태 유지
                         </span>
                     </label>
-                </div>
 
-                <div className="mt-4 flex items-center justify-end">
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
                         >
-                            Forgot your password?
+                            비밀번호 찾기
                         </Link>
                     )}
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
                 </div>
+
+                <PrimaryButton className="w-full justify-center" disabled={processing}>
+                    로그인
+                </PrimaryButton>
             </form>
+
+            <p className="mt-6 text-center text-sm text-gray-600">
+                아직 계정이 없으신가요?{' '}
+                <Link
+                    href={route('register')}
+                    className="font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                    회원가입
+                </Link>
+            </p>
         </GuestLayout>
     );
 }

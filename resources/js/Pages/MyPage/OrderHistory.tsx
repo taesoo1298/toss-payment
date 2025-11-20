@@ -1,14 +1,14 @@
 import { Head, Link } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import MyPageLayout from "@/Layouts/MyPageLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import { Badge } from "@/Components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/Components/ui/dialog";
+import { Label } from "@/Components/ui/label";
+import { Input } from "@/Components/ui/input";
+import { Checkbox } from "@/Components/ui/checkbox";
 import {
     Package,
     Truck,
@@ -196,12 +196,12 @@ export default function OrderHistory({ auth }: PageProps) {
         }).format(date);
     };
 
-    const filterOrders = (status?: Order["status"]) => {
+    const filterOrders = (status?: Order["status"] | "all") => {
         if (!status || status === "all") return mockOrders;
         return mockOrders.filter((order) => order.status === status);
     };
 
-    const getOrderCount = (status?: Order["status"]) => {
+    const getOrderCount = (status?: Order["status"] | "all") => {
         return filterOrders(status as any).length;
     };
 

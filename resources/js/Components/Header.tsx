@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/Components/ui/button';
+import { Input } from '@/Components/ui/input';
 import { ShoppingCart, Search, User, Menu, Smile } from 'lucide-react';
 import { User as UserType } from '@/types';
 

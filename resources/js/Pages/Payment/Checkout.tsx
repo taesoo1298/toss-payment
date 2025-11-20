@@ -1,13 +1,13 @@
 import { FormEventHandler, useEffect, useRef, useState } from "react";
 import { Head, Link } from "@inertiajs/react";
 import Header from "@/Components/Header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Input } from "@/Components/ui/input";
+import { Label } from "@/Components/ui/label";
+import { Button } from "@/Components/ui/button";
+import { Alert, AlertDescription } from "@/Components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/Components/ui/dialog";
+import { Badge } from "@/Components/ui/badge";
 import { AlertCircle, CheckCircle2, ShoppingBag, Truck, CreditCard, Ticket, Calendar, MapPin, Home, Building } from "lucide-react";
 import { PageProps } from "@/types";
 

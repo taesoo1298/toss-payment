@@ -1,7 +1,7 @@
 import { Head, Link } from "@inertiajs/react";
 import Header from "@/Components/Header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
 import { CheckCircle2, Package, Truck, CreditCard, MapPin, User, Phone, Mail } from "lucide-react";
 import { PageProps } from "@/types";
 

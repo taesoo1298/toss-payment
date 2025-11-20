@@ -2,10 +2,10 @@ import { Head, Link, router } from "@inertiajs/react";
 import { PageProps, Product } from "@/types";
 import Header from "@/Components/Header";
 import ProductCard from "@/Components/ProductCard";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import { Checkbox } from "@/Components/ui/checkbox";
+import { Label } from "@/Components/ui/label";
 import {
     ChevronDown,
     ChevronRight,

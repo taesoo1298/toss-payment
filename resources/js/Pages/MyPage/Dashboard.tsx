@@ -1,9 +1,9 @@
 import { Head, Link } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import MyPageLayout from "@/Layouts/MyPageLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Button } from "@/Components/ui/button";
+import { Badge } from "@/Components/ui/badge";
 import {
     ShoppingBag,
     Package,
@@ -118,8 +118,8 @@ export default function Dashboard({ auth }: PageProps) {
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <Card className="hover:shadow-md transition-shadow cursor-pointer" asChild>
-                                <Link href="/mypage/orders?status=preparing">
+                            <Link href="/mypage/orders?status=preparing">
+                                <Card className="hover:shadow-md transition-shadow cursor-pointer">
                                     <CardContent className="pt-6">
                                         <div className="text-center">
                                             <Package className="h-8 w-8 mx-auto mb-2 text-yellow-600" />
@@ -127,11 +127,11 @@ export default function Dashboard({ auth }: PageProps) {
                                             <div className="text-sm text-muted-foreground">상품준비중</div>
                                         </div>
                                     </CardContent>
-                                </Link>
-                            </Card>
+                                </Card>
+                            </Link>
 
-                            <Card className="hover:shadow-md transition-shadow cursor-pointer" asChild>
-                                <Link href="/mypage/orders?status=shipping">
+                            <Link href="/mypage/orders?status=shipping">
+                                <Card className="hover:shadow-md transition-shadow cursor-pointer">
                                     <CardContent className="pt-6">
                                         <div className="text-center">
                                             <Truck className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
@@ -139,11 +139,11 @@ export default function Dashboard({ auth }: PageProps) {
                                             <div className="text-sm text-muted-foreground">배송중</div>
                                         </div>
                                     </CardContent>
-                                </Link>
-                            </Card>
+                                </Card>
+                            </Link>
 
-                            <Card className="hover:shadow-md transition-shadow cursor-pointer" asChild>
-                                <Link href="/mypage/orders?status=delivered">
+                            <Link href="/mypage/orders?status=delivered">
+                                <Card className="hover:shadow-md transition-shadow cursor-pointer">
                                     <CardContent className="pt-6">
                                         <div className="text-center">
                                             <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-600" />
@@ -151,11 +151,11 @@ export default function Dashboard({ auth }: PageProps) {
                                             <div className="text-sm text-muted-foreground">배송완료</div>
                                         </div>
                                     </CardContent>
-                                </Link>
-                            </Card>
+                                </Card>
+                            </Link>
 
-                            <Card className="hover:shadow-md transition-shadow cursor-pointer" asChild>
-                                <Link href="/mypage/wishlist">
+                            <Link href="/mypage/wishlist">
+                                <Card className="hover:shadow-md transition-shadow cursor-pointer">
                                     <CardContent className="pt-6">
                                         <div className="text-center">
                                             <Heart className="h-8 w-8 mx-auto mb-2 text-red-600" />
@@ -163,8 +163,8 @@ export default function Dashboard({ auth }: PageProps) {
                                             <div className="text-sm text-muted-foreground">찜한 상품</div>
                                         </div>
                                     </CardContent>
-                                </Link>
-                            </Card>
+                                </Card>
+                            </Link>
                         </div>
                     </div>
 
