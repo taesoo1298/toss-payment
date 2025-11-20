@@ -4,17 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Laravel 12 application using **Inertia.js** with **React** and **TypeScript** for the frontend, built with Laravel Breeze authentication starter kit. The project appears to be for Toss payment integration based on the project name.
+**Dr.Smile E-Commerce Platform** - A premium dental care e-commerce platform specializing in toothpaste products made by dentists.
+
+This is a Laravel 12 application using **Inertia.js** with **React** and **TypeScript** for the frontend, built with Laravel Breeze authentication starter kit. The platform features full e-commerce functionality including product catalog, shopping cart, checkout with Toss Payments integration, order management, and comprehensive MyPage features.
+
+**See `SPECIFICATIONS.md` for complete technical specifications and feature documentation.**
 
 ## Technology Stack
 
 -   **Backend**: Laravel 12 (PHP 8.2+)
 -   **Frontend**: React 18 + TypeScript
 -   **Frontend Framework**: Inertia.js 2.0 (React adapter)
+-   **UI Components**: shadcn/ui (Radix UI based)
 -   **Styling**: Tailwind CSS 3
 -   **Build Tool**: Vite 7
--   **Database**: Mysql (configured in .env)
+-   **Database**: MySQL/MariaDB (configured in .env)
 -   **Authentication**: Laravel Breeze with Sanctum
+-   **Payment Gateway**: Toss Payments v2
 -   **Queue/Cache/Session**: Database-backed
 
 ## Development Commands
@@ -88,20 +94,33 @@ php artisan test           # Direct artisan test command
 
 -   **Page Components**: `resources/js/Pages/`
 
-    -   `Welcome.tsx` - Landing page
-    -   `Dashboard.tsx` - Authenticated dashboard
+    -   `Welcome.tsx` - Dr.Smile landing page (e-commerce main)
+    -   `Products/ProductList.tsx` - Product catalog with category filters
+    -   `Products/ProductDetail.tsx` - Product detail with review system
+    -   `Cart/Index.tsx` - Shopping cart
+    -   `Payment/Checkout.tsx` - Checkout with address/coupon selection
+    -   `Payment/Success.tsx` - Payment success handler
+    -   `Payment/Fail.tsx` - Payment failure page
+    -   `Payment/OrderComplete.tsx` - Order confirmation page
+    -   `MyPage/Dashboard.tsx` - MyPage home with statistics
+    -   `MyPage/OrderHistory.tsx` - Order management (cancel/refund/exchange)
+    -   `MyPage/Coupons.tsx` - Coupon management
+    -   `MyPage/Addresses.tsx` - Shipping address CRUD
+    -   `MyPage/Wishlist.tsx` - Wishlist management
     -   `Auth/` - Authentication pages (Login, Register, ForgotPassword, etc.)
     -   `Profile/` - User profile management with partials
 
 -   **Shared Components**: `resources/js/Components/`
 
-    -   Reusable UI components (Buttons, Forms, Modals, etc.)
-    -   Built with Headless UI and Tailwind CSS
+    -   `Header.tsx` - Main navigation with cart and user menu
+    -   `ProductCard.tsx` - Reusable product display card
+    -   `ui/` - shadcn/ui components (Button, Card, Dialog, Badge, etc.)
 
 -   **Layouts**: `resources/js/Layouts/`
 
-    -   `AuthenticatedLayout.tsx` - For logged-in users
+    -   `AuthenticatedLayout.tsx` - Original Breeze layout
     -   `GuestLayout.tsx` - For public pages
+    -   `MyPageLayout.tsx` - MyPage with sidebar navigation
 
 -   **TypeScript Path Aliases**:
     -   `@/*` maps to `resources/js/*`
@@ -211,4 +230,89 @@ See `SANCTUM_AUTH.md` for detailed authentication documentation.
 -   **Database**: MySQL/MariaDB on localhost (DB_DATABASE=toss_payment)
 -   **Vite Config**: Single entry point at `resources/js/app.tsx`
 -   **TypeScript**: Strict mode enabled with React JSX transform
--   **Toss SDK**: Loaded via CDN script in `app.blade.php` (v1/payment-widget)
+-   **Toss SDK**: Loaded via CDN script in `app.blade.php` (v2/payment-widget)
+
+## Current Implementation Status
+
+### ✅ Implemented Features (Frontend Only - Mock Data)
+
+**E-Commerce Core**:
+- Product catalog with 8 categories (미백케어, 잇몸케어, 민감치아, etc.)
+- Product listing with filters (price, features, rating) and sorting
+- Product detail page with image gallery and specifications
+- Shopping cart with quantity management
+- Checkout flow with Toss Payments v2 integration
+- Order completion and tracking
+
+**User Features**:
+- User authentication (Laravel Breeze + Sanctum)
+- MyPage dashboard with order statistics
+- Order history with status filtering
+- Order management (cancel/refund/exchange)
+- Coupon management (registration and usage)
+- Shipping address CRUD with default address
+- Wishlist functionality
+- Product review system with rating and image upload
+
+**Payment Integration**:
+- Toss Payments v2 SDK integration
+- Payment preparation and confirmation flow
+- Multiple payment methods (card, transfer, easy pay)
+- Payment success/failure handling
+- Order completion tracking
+
+### ⚠️ Backend Implementation Needed
+
+**Database & Models**:
+- [ ] Products table and Product model
+- [ ] Orders table and Order model
+- [ ] Order Items table
+- [ ] Reviews table with image storage
+- [ ] Coupons and User Coupons tables
+- [ ] Addresses table
+- [ ] Cart Items table
+- [ ] Wishlist table
+
+**API Endpoints**:
+- [ ] Product CRUD APIs (`/api/products`)
+- [ ] Cart management APIs (`/api/cart`)
+- [ ] Order management APIs (`/api/orders`)
+- [ ] Review APIs with image upload (`/api/reviews`)
+- [ ] Coupon APIs (`/api/coupons`)
+- [ ] Address APIs (`/api/addresses`)
+- [ ] Wishlist APIs (`/api/wishlist`)
+
+**Controllers**:
+- [ ] ProductController
+- [ ] CartController
+- [ ] OrderController (cancel/refund/exchange)
+- [ ] ReviewController
+- [ ] CouponController
+- [ ] AddressController
+- [ ] WishlistController
+
+**Additional Features**:
+- [ ] Image upload to cloud storage (AWS S3/Cloudinary)
+- [ ] Email notifications for orders
+- [ ] Admin panel for product/order management
+- [ ] Inventory management
+- [ ] Points system implementation
+- [ ] Order status webhooks and notifications
+
+### 📝 Notes for Backend Implementation
+
+**Priority Order**:
+1. Database migrations for all tables (see SPECIFICATIONS.md section 4)
+2. Product CRUD and seeding with real data
+3. Cart and Order APIs to replace mock data
+4. Payment confirmation should create real orders
+5. Review and Coupon functionality
+6. Admin panel for content management
+
+**Current Data Flow**:
+- All frontend pages currently use **mock data** (TypeScript interfaces)
+- Payment APIs are functional but need integration with Order system
+- User authentication is fully functional with Sanctum tokens
+- Frontend is complete and ready for API integration
+
+See `SPECIFICATIONS.md` for complete API specifications and database schema.

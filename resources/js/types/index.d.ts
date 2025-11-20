@@ -25,4 +25,12 @@ export type PageProps<
         user: User;
         token?: string;
     };
+    ziggy: {
+        location: string;
+        [key: string]: any;
+    };
+    flash?: {
+        success?: string;
+        error?: string;
+    };
 };
