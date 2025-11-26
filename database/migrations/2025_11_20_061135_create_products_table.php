@@ -26,7 +26,7 @@ return new class extends Migration
             $table->decimal('cost_price', 10, 2)->nullable()->comment('원가');
 
             // 분류
-            $table->string('category', 100);
+            $table->foreignId('category_id')->nullable()->constrained('product_categories')->nullOnDelete()->comment('카테고리');
             $table->string('brand', 100)->default('Dr.Smile');
 
             // 상세 정보
@@ -82,7 +82,7 @@ return new class extends Migration
             $table->softDeletes()->comment('Soft delete');
 
             // 인덱스
-            $table->index('category');
+            $table->index('category_id');
             $table->index('rating');
             $table->index('price');
             $table->index('stock');
