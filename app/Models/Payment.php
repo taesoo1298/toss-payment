@@ -71,6 +71,14 @@ class Payment extends Model
     }
 
     /**
+     * Get the order associated with the payment.
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'order_id', 'order_id');
+    }
+
+    /**
      * Get the transactions for the payment.
      */
     public function transactions(): HasMany

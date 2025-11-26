@@ -36,7 +36,7 @@ export default function AdminLayout({ header, children }: AdminLayoutProps) {
         },
         {
             name: '주문 관리',
-            href: '#',
+            href: route('admin.orders.index'),
             routeName: 'admin.orders.*',
             icon: (
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +46,7 @@ export default function AdminLayout({ header, children }: AdminLayoutProps) {
         },
         {
             name: '회원 관리',
-            href: '#',
+            href: route('admin.users.index'),
             routeName: 'admin.users.*',
             icon: (
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +56,7 @@ export default function AdminLayout({ header, children }: AdminLayoutProps) {
         },
         {
             name: '리뷰 관리',
-            href: '#',
+            href: route('admin.reviews.index'),
             routeName: 'admin.reviews.*',
             icon: (
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@ export default function AdminLayout({ header, children }: AdminLayoutProps) {
         },
         {
             name: '쿠폰 관리',
-            href: '#',
+            href: route('admin.coupons.index'),
             routeName: 'admin.coupons.*',
             icon: (
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@ export default function AdminLayout({ header, children }: AdminLayoutProps) {
         },
         {
             name: '결제 관리',
-            href: '#',
+            href: route('admin.payments.index'),
             routeName: 'admin.payments.*',
             icon: (
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,11 +111,11 @@ export default function AdminLayout({ header, children }: AdminLayoutProps) {
                 )}
 
                 {/* Sidebar */}
-                <div className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+                <div className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
                     sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}>
                     {/* Logo */}
-                    <div className="flex h-16 items-center justify-between border-b border-gray-200 px-6">
+                    <div className="flex h-16 items-center justify-between border-b border-gray-200 px-6 flex-shrink-0">
                         <Link href={route('admin.dashboard')} className="flex items-center space-x-2">
                             <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
                             <span className="text-sm font-semibold text-gray-500">Admin</span>
@@ -131,7 +131,7 @@ export default function AdminLayout({ header, children }: AdminLayoutProps) {
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1 space-y-1 px-3 py-4">
+                    <nav className="flex-1 overflow-y-auto space-y-1 px-3 py-4">
                         {navigation.map((item) => {
                             const isCurrent = route().current(item.routeName);
                             return (
@@ -153,104 +153,104 @@ export default function AdminLayout({ header, children }: AdminLayoutProps) {
                         })}
                     </nav>
 
-                {/* User section */}
-                <div className="border-t border-gray-200 p-4">
-                    <div className="flex items-center">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-600">
-                            {user.name.charAt(0).toUpperCase()}
+                    {/* User section */}
+                    <div className="border-t border-gray-200 p-4 flex-shrink-0">
+                        <div className="flex items-center">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-600">
+                                {user.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="ml-3 flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-700 truncate">{user.name}</p>
+                                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                            </div>
                         </div>
-                        <div className="ml-3 flex-1">
-                            <p className="text-sm font-medium text-gray-700">{user.name}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
-                        </div>
-                    </div>
-                    <div className="mt-3 space-y-1">
-                        <Link
-                            href="/"
-                            className="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                        >
-                            사이트로 이동
-                        </Link>
-                        <Link
-                            href={route('profile.edit')}
-                            className="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                        >
-                            프로필
-                        </Link>
-                        <Link
-                            href={route('logout')}
-                            method="post"
-                            as="button"
-                            className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                        >
-                            로그아웃
-                        </Link>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main content */}
-            <div className="lg:pl-64">
-                {/* Top bar */}
-                <div className="sticky top-0 z-10 flex h-16 flex-shrink-0 border-b border-gray-200 bg-white">
-                    <button
-                        type="button"
-                        className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 lg:hidden"
-                        onClick={() => setSidebarOpen(true)}
-                    >
-                        <span className="sr-only">Open sidebar</span>
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-
-                    <div className="flex flex-1 justify-between px-4 sm:px-6 lg:px-8">
-                        <div className="flex flex-1 items-center">
-                            {header && (
-                                <h1 className="text-xl font-semibold text-gray-900">{header}</h1>
-                            )}
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <Dropdown>
-                                <Dropdown.Trigger>
-                                    <button className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">
-                                        {user.name}
-                                        <svg className="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
-                                </Dropdown.Trigger>
-                                <Dropdown.Content>
-                                    <Dropdown.Link href="/">사이트로 이동</Dropdown.Link>
-                                    <Dropdown.Link href={route('profile.edit')}>프로필</Dropdown.Link>
-                                    <Dropdown.Link href={route('logout')} method="post" as="button">
-                                        로그아웃
-                                    </Dropdown.Link>
-                                </Dropdown.Content>
-                            </Dropdown>
+                        <div className="mt-3 space-y-1">
+                            <Link
+                                href="/"
+                                className="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            >
+                                사이트로 이동
+                            </Link>
+                            <Link
+                                href={route('profile.edit')}
+                                className="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            >
+                                프로필
+                            </Link>
+                            <Link
+                                href={route('logout')}
+                                method="post"
+                                as="button"
+                                className="block w-full rounded-md px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            >
+                                로그아웃
+                            </Link>
                         </div>
                     </div>
                 </div>
 
-                {/* Page content */}
-                <main className="p-6">
-                    {/* Flash messages */}
-                    {flash?.success && (
-                        <div className="mb-4 rounded-md bg-green-50 p-4">
-                            <p className="text-sm text-green-800">{flash.success}</p>
-                        </div>
-                    )}
+                {/* Main content */}
+                <div className="lg:pl-64">
+                    {/* Top bar */}
+                    <div className="sticky top-0 z-10 flex h-16 flex-shrink-0 border-b border-gray-200 bg-white">
+                        <button
+                            type="button"
+                            className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 lg:hidden"
+                            onClick={() => setSidebarOpen(true)}
+                        >
+                            <span className="sr-only">Open sidebar</span>
+                            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
 
-                    {flash?.error && (
-                        <div className="mb-4 rounded-md bg-red-50 p-4">
-                            <p className="text-sm text-red-800">{flash.error}</p>
+                        <div className="flex flex-1 justify-between px-4 sm:px-6 lg:px-8">
+                            <div className="flex flex-1 items-center">
+                                {header && (
+                                    <h1 className="text-xl font-semibold text-gray-900">{header}</h1>
+                                )}
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <Dropdown>
+                                    <Dropdown.Trigger>
+                                        <button className="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">
+                                            {user.name}
+                                            <svg className="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </Dropdown.Trigger>
+                                    <Dropdown.Content>
+                                        <Dropdown.Link href="/">사이트로 이동</Dropdown.Link>
+                                        <Dropdown.Link href={route('profile.edit')}>프로필</Dropdown.Link>
+                                        <Dropdown.Link href={route('logout')} method="post" as="button">
+                                            로그아웃
+                                        </Dropdown.Link>
+                                    </Dropdown.Content>
+                                </Dropdown>
+                            </div>
                         </div>
-                    )}
+                    </div>
 
-                    {children}
-                </main>
+                    {/* Page content */}
+                    <main className="p-6">
+                        {/* Flash messages */}
+                        {flash?.success && (
+                            <div className="mb-4 rounded-md bg-green-50 p-4">
+                                <p className="text-sm text-green-800">{flash.success}</p>
+                            </div>
+                        )}
+
+                        {flash?.error && (
+                            <div className="mb-4 rounded-md bg-red-50 p-4">
+                                <p className="text-sm text-red-800">{flash.error}</p>
+                            </div>
+                        )}
+
+                        {children}
+                    </main>
+                </div>
             </div>
-        </div>
         </>
     );
 }

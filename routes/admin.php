@@ -1,7 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -32,40 +37,41 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     // Orders Management
     Route::prefix('orders')->name('admin.orders.')->group(function () {
-        // Route::get('/', [OrderController::class, 'index'])->name('index');
-        // Route::get('/{order}', [OrderController::class, 'show'])->name('show');
-        // Route::put('/{order}/status', [OrderController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+        Route::put('/{order}/status', [OrderController::class, 'updateStatus'])->name('updateStatus');
     });
 
     // Users Management
     Route::prefix('users')->name('admin.users.')->group(function () {
-        // Route::get('/', [UserController::class, 'index'])->name('index');
-        // Route::get('/{user}', [UserController::class, 'show'])->name('show');
-        // Route::put('/{user}', [UserController::class, 'update'])->name('update');
-        // Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/{user}', [UserController::class, 'show'])->name('show');
+        Route::put('/{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
     });
 
     // Reviews Management
     Route::prefix('reviews')->name('admin.reviews.')->group(function () {
-        // Route::get('/', [ReviewController::class, 'index'])->name('index');
-        // Route::delete('/{review}', [ReviewController::class, 'destroy'])->name('destroy');
-        // Route::put('/{review}/approve', [ReviewController::class, 'approve'])->name('approve');
+        Route::get('/', [ReviewController::class, 'index'])->name('index');
+        Route::delete('/{review}', [ReviewController::class, 'destroy'])->name('destroy');
+        Route::put('/{review}/approve', [ReviewController::class, 'approve'])->name('approve');
     });
 
     // Coupons Management
     Route::prefix('coupons')->name('admin.coupons.')->group(function () {
-        // Route::get('/', [CouponController::class, 'index'])->name('index');
+        Route::get('/', [CouponController::class, 'index'])->name('index');
+        Route::delete('/{coupon}', [CouponController::class, 'destroy'])->name('destroy');
         // Route::get('/create', [CouponController::class, 'create'])->name('create');
         // Route::post('/', [CouponController::class, 'store'])->name('store');
         // Route::get('/{coupon}/edit', [CouponController::class, 'edit'])->name('edit');
         // Route::put('/{coupon}', [CouponController::class, 'update'])->name('update');
-        // Route::delete('/{coupon}', [CouponController::class, 'destroy'])->name('destroy');
     });
 
     // Payments Management
     Route::prefix('payments')->name('admin.payments.')->group(function () {
-        // Route::get('/', [PaymentController::class, 'index'])->name('index');
-        // Route::get('/{payment}', [PaymentController::class, 'show'])->name('show');
+        Route::get('/', [PaymentController::class, 'index'])->name('index');
+        Route::get('/{payment}', [PaymentController::class, 'show'])->name('show');
+        Route::post('/{payment}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
     });
 
     // Settings

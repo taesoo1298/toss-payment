@@ -8,6 +8,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class ProductResource extends JsonResource
 {
     /**
+     * Disable data wrapping
+     */
+    public static $wrap = null;
+
+    /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
@@ -29,7 +34,7 @@ class ProductResource extends JsonResource
             'costPrice' => $this->cost_price,
 
             // 분류
-            'category' => $this->category,
+            'category_id' => $this->category_id,
             'brand' => $this->brand,
 
             // 상세 정보
