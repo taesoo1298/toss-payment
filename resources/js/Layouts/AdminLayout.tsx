@@ -86,7 +86,7 @@ export default function AdminLayout({ header, children }: AdminLayoutProps) {
         },
         {
             name: '설정',
-            href: '#',
+            href: route('admin.settings.index'),
             routeName: 'admin.settings.*',
             icon: (
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

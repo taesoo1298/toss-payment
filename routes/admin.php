@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -76,7 +77,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     // Settings
     Route::prefix('settings')->name('admin.settings.')->group(function () {
-        // Route::get('/', [SettingsController::class, 'index'])->name('index');
-        // Route::put('/', [SettingsController::class, 'update'])->name('update');
+        Route::get('/', [SettingController::class, 'index'])->name('index');
+        Route::post('/', [SettingController::class, 'update'])->name('update');
     });
 });
