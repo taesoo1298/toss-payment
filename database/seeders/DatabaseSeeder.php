@@ -17,18 +17,27 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Create test user if not exists
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+            ]
+        );
 
         $this->call([
+            AdminSeeder::class,
             ProductCategorySeeder::class,
             ProductSeeder::class,
             CouponSeeder::class,
+            UserCouponSeeder::class,
             OrderSeeder::class,
             ReviewSeeder::class,
             PaymentSeeder::class,
+            SettingSeeder::class,
+            CartSeeder::class,
         ]);
     }
 }

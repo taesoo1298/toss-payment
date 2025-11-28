@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\InquiryController;
+use App\Http\Controllers\Admin\NoticeController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ProductController;
@@ -73,6 +76,34 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('index');
         Route::get('/{payment}', [PaymentController::class, 'show'])->name('show');
         Route::post('/{payment}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
+    });
+
+    // FAQ Management
+    Route::prefix('faqs')->name('admin.faqs.')->group(function () {
+        Route::get('/', [FaqController::class, 'index'])->name('index');
+        Route::get('/create', [FaqController::class, 'create'])->name('create');
+        Route::post('/', [FaqController::class, 'store'])->name('store');
+        Route::get('/{faq}/edit', [FaqController::class, 'edit'])->name('edit');
+        Route::put('/{faq}', [FaqController::class, 'update'])->name('update');
+        Route::delete('/{faq}', [FaqController::class, 'destroy'])->name('destroy');
+    });
+
+    // Notice Management
+    Route::prefix('notices')->name('admin.notices.')->group(function () {
+        Route::get('/', [NoticeController::class, 'index'])->name('index');
+        Route::get('/create', [NoticeController::class, 'create'])->name('create');
+        Route::post('/', [NoticeController::class, 'store'])->name('store');
+        Route::get('/{notice}/edit', [NoticeController::class, 'edit'])->name('edit');
+        Route::put('/{notice}', [NoticeController::class, 'update'])->name('update');
+        Route::delete('/{notice}', [NoticeController::class, 'destroy'])->name('destroy');
+    });
+
+    // Inquiry Management
+    Route::prefix('inquiries')->name('admin.inquiries.')->group(function () {
+        Route::get('/', [InquiryController::class, 'index'])->name('index');
+        Route::get('/{inquiry}', [InquiryController::class, 'show'])->name('show');
+        Route::post('/{inquiry}/answer', [InquiryController::class, 'answer'])->name('answer');
+        Route::delete('/{inquiry}', [InquiryController::class, 'destroy'])->name('destroy');
     });
 
     // Settings

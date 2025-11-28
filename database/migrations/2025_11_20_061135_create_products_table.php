@@ -45,6 +45,7 @@ return new class extends Migration
             // 특징 태그
             $table->json('features')->nullable()->comment('["미백", "잇몸케어", "민감치아"]');
             $table->json('target_audience')->nullable()->comment('["성인", "어린이", "노인"]');
+            $table->json('keywords')->nullable()->comment('해시태그 키워드 (예: ["치과의사개발", "임상실험"])');
 
             // 평점 및 리뷰
             $table->decimal('rating', 3, 2)->default(0)->comment('평균 평점');

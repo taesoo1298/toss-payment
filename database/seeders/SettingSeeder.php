@@ -88,6 +88,30 @@ class SettingSeeder extends Seeder
                 'label' => '배송 정책',
                 'description' => '배송 관련 안내 문구',
             ],
+            [
+                'key' => 'return_policy',
+                'value' => '상품 수령 후 7일 이내 반품 가능합니다.\n제품 하자가 아닌 단순 변심의 경우 왕복 배송비가 발생합니다.\n개봉 후 사용한 제품은 반품이 불가능합니다.',
+                'type' => 'string',
+                'group' => 'shipping',
+                'label' => '반품 정책',
+                'description' => '반품 관련 안내 문구',
+            ],
+            [
+                'key' => 'exchange_policy',
+                'value' => '상품 수령 후 7일 이내 교환 가능합니다.\n제품 하자가 있는 경우 무료 교환 가능합니다.\n단순 변심의 경우 왕복 배송비가 발생합니다.',
+                'type' => 'string',
+                'group' => 'shipping',
+                'label' => '교환 정책',
+                'description' => '교환 관련 안내 문구',
+            ],
+            [
+                'key' => 'shipping_cost',
+                'value' => '3000',
+                'type' => 'number',
+                'group' => 'shipping',
+                'label' => '배송비',
+                'description' => '기본 배송비 (원) - shipping_fee와 동일',
+            ],
 
             // 포인트 설정
             [

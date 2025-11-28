@@ -14,9 +14,22 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+interface PaginatedProducts {
+    data: Product[];
+    links: any;
+    meta: any;
+}
+
 interface ProductListProps extends PageProps {
     category?: string;
-    products?: Product[];
+    products?: PaginatedProducts;
+    filters?: {
+        price_min?: number;
+        price_max?: number;
+        features?: string[];
+        rating?: number;
+        sort?: string;
+    };
 }
 
 export default function ProductList({ auth, category, products }: ProductListProps) {
@@ -34,8 +47,8 @@ export default function ProductList({ auth, category, products }: ProductListPro
         { id: "gift", name: "선물세트", count: 2 },
     ];
 
-    // Mock products data
-    const mockProducts: Product[] = products || [
+    // 백엔드에서 받은 상품 데이터 (없으면 mock 데이터 사용)
+    const productList: Product[] = products?.data || [
         {
             id: 1,
             name: "Dr.Smile 미백 치약 프로",
@@ -209,7 +222,7 @@ export default function ProductList({ auth, category, products }: ProductListPro
         filters.ratings.length > 0;
 
     // 필터링된 상품
-    const filteredProducts = mockProducts.filter((product) => {
+    const filteredProducts = productList.filter((product) => {
         // 카테고리 필터
         if (selectedCategory !== "all" && product.category !== categories.find(c => c.id === selectedCategory)?.name) {
             return false;

@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(dir:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(composer require:*)",
+      "Bash(php artisan:*)",
+      "Bash(git mv:*)",
+      "Bash(find:*)",
+      "Bash(composer show:*)"
     ],
     "deny": [],
     "ask": []

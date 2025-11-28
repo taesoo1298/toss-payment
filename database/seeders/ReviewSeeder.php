@@ -33,10 +33,10 @@ class ReviewSeeder extends Seeder
                         'order_item_id' => $item->id,
                         'rating' => $rating,
                         'content' => $this->getReviewContent($rating),
-                        'images' => rand(1, 100) <= 30 ? json_encode([
+                        'images' => rand(1, 100) <= 30 ? [
                             '/images/reviews/' . rand(1, 100) . '.jpg',
                             '/images/reviews/' . rand(1, 100) . '.jpg',
-                        ]) : null,
+                        ] : null,
                         'is_verified' => true, // 구매 확정된 리뷰
                         'created_at' => $order->created_at->addDays(rand(3, 14)),
                         'updated_at' => $order->created_at->addDays(rand(3, 14)),

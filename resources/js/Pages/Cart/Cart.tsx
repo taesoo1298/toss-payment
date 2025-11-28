@@ -6,49 +6,23 @@ import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
 import { X, Plus, Minus, ShoppingBag, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
+import axios from 'axios';
 
 interface CartItem extends Product {
     quantity: number;
     selected: boolean;
+    cartItemId?: number;
 }
 
-export default function Cart({ auth }: PageProps) {
-    // Mock cart data
-    const [cartItems, setCartItems] = useState<CartItem[]>([
-        {
-            id: 1,
-            name: 'Dr.Smile 미백 치약 프로',
-            description: '치과 미백 성분으로 누런 치아를 하얗게! 민감한 치아도 OK',
-            price: 18900,
-            originalPrice: 25000,
-            image: 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=200&q=80',
-            category: '미백케어',
-            quantity: 2,
-            selected: true,
-        },
-        {
-            id: 2,
-            name: 'Dr.Smile 잇몸케어 치약',
-            description: '출혈과 염증을 완화하는 프로폴리스 함유 잇몸 전문 치약',
-            price: 16900,
-            originalPrice: 22000,
-            image: 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=200&q=80',
-            category: '잇몸케어',
-            quantity: 1,
-            selected: true,
-        },
-        {
-            id: 6,
-            name: 'Dr.Smile 올인원 토탈케어',
-            description: '미백+잇몸+충치예방을 한번에! 올인원 솔루션',
-            price: 19900,
-            originalPrice: 26000,
-            image: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=200&q=80',
-            category: '토탈케어',
-            quantity: 1,
-            selected: false,
-        },
-    ]);
+interface CartProps extends PageProps {
+    initialCartItems: CartItem[];
+    cartId: number;
+}
+
+export default function Cart({ auth, initialCartItems }: CartProps) {
+    const [cartItems, setCartItems] = useState<CartItem[]>(
+        initialCartItems.map(item => ({ ...item, selected: true }))
+    );
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('ko-KR', {
@@ -57,14 +31,36 @@ export default function Cart({ auth }: PageProps) {
         }).format(price);
     };
 
-    const handleQuantityChange = (id: number, delta: number) => {
+    const handleQuantityChange = async (id: number, delta: number) => {
+        const item = cartItems.find(item => item.id === id);
+        if (!item) return;
+
+        const newQuantity = Math.max(1, item.quantity + delta);
+
+        // Optimistic update
         setCartItems(items =>
             items.map(item =>
                 item.id === id
-                    ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+                    ? { ...item, quantity: newQuantity }
                     : item
             )
         );
+
+        try {
+            await axios.patch(`/api/cart/items/${id}`, {
+                quantity: newQuantity,
+            });
+        } catch (error: any) {
+            // Revert on error
+            setCartItems(items =>
+                items.map(item =>
+                    item.id === id
+                        ? { ...item, quantity: item.quantity }
+                        : item
+                )
+            );
+            alert(error.response?.data?.message || '수량 업데이트에 실패했습니다.');
+        }
     };
 
     const handleToggleItem = (id: number) => {
@@ -80,12 +76,39 @@ export default function Cart({ auth }: PageProps) {
         setCartItems(items => items.map(item => ({ ...item, selected: !allSelected })));
     };
 
-    const handleRemoveItem = (id: number) => {
+    const handleRemoveItem = async (id: number) => {
+        if (!confirm('상품을 삭제하시겠습니까?')) return;
+
+        // Optimistic update
         setCartItems(items => items.filter(item => item.id !== id));
+
+        try {
+            await axios.delete(`/api/cart/items/${id}`);
+        } catch (error) {
+            alert('삭제에 실패했습니다.');
+            // Reload page on error to sync state
+            router.reload();
+        }
     };
 
-    const handleRemoveSelected = () => {
+    const handleRemoveSelected = async () => {
+        if (selectedItems.length === 0) return;
+        if (!confirm('선택한 상품을 삭제하시겠습니까?')) return;
+
+        const selectedIds = selectedItems.map(item => item.id);
+
+        // Optimistic update
         setCartItems(items => items.filter(item => !item.selected));
+
+        try {
+            await axios.post('/api/cart/items/remove-multiple', {
+                product_ids: selectedIds,
+            });
+        } catch (error) {
+            alert('삭제에 실패했습니다.');
+            // Reload page on error to sync state
+            router.reload();
+        }
     };
 
     const selectedItems = cartItems.filter(item => item.selected);

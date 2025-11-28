@@ -67,17 +67,21 @@ const menuItems = [
         id: "settings",
         label: "계정 설정",
         icon: Settings,
-        href: "/profile/edit",
+        href: "/mypage/settings",
     },
     {
-        id: "help",
-        label: "고객센터",
+        id: "inquiry",
+        label: "1:1 문의",
         icon: HelpCircle,
-        href: "/help",
+        href: "/customer-center/inquiry",
     },
 ];
 
-export default function MyPageLayout({ user, children, currentPage = "dashboard" }: MyPageLayoutProps) {
+export default function MyPageLayout({
+    user,
+    children,
+    currentPage = "dashboard",
+}: MyPageLayoutProps) {
     return (
         <div className="min-h-screen bg-background">
             <Header user={user} />
@@ -103,7 +107,9 @@ export default function MyPageLayout({ user, children, currentPage = "dashboard"
                                             <UserIcon className="h-6 w-6 text-primary" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-semibold truncate">{user.name}</div>
+                                            <div className="font-semibold truncate">
+                                                {user.name}
+                                            </div>
                                             <div className="text-xs text-muted-foreground truncate">
                                                 {user.email}
                                             </div>
@@ -115,7 +121,8 @@ export default function MyPageLayout({ user, children, currentPage = "dashboard"
                                 <nav className="space-y-1">
                                     {menuItems.map((item) => {
                                         const Icon = item.icon;
-                                        const isActive = currentPage === item.id;
+                                        const isActive =
+                                            currentPage === item.id;
 
                                         return (
                                             <Link

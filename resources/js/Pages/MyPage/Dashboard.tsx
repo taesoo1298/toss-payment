@@ -29,51 +29,22 @@ interface RecentOrder {
     thumbnail: string;
 }
 
-export default function Dashboard({ auth }: PageProps) {
+interface Stats {
+    preparing: number;
+    shipping: number;
+    delivered: number;
+    points: number;
+    coupons: number;
+    wishlist: number;
+}
+
+interface DashboardProps extends PageProps {
+    stats: Stats;
+    recentOrders: RecentOrder[];
+}
+
+export default function Dashboard({ auth, stats, recentOrders }: DashboardProps) {
     const user = auth.user!;
-
-    // Mock data
-    const stats = {
-        preparing: 1,
-        shipping: 1,
-        delivered: 1,
-        points: 5470,
-        coupons: 3,
-        wishlist: 8,
-    };
-
-    const recentOrders: RecentOrder[] = [
-        {
-            id: "1",
-            orderId: "ORDER-20251029-001234",
-            date: "2025-10-29",
-            status: "preparing",
-            statusLabel: "상품준비중",
-            itemCount: 2,
-            totalAmount: 54700,
-            thumbnail: "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=100&q=80",
-        },
-        {
-            id: "2",
-            orderId: "ORDER-20251025-005678",
-            date: "2025-10-25",
-            status: "delivered",
-            statusLabel: "배송완료",
-            itemCount: 1,
-            totalAmount: 44700,
-            thumbnail: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=100&q=80",
-        },
-        {
-            id: "3",
-            orderId: "ORDER-20251020-003456",
-            date: "2025-10-20",
-            status: "shipping",
-            statusLabel: "배송중",
-            itemCount: 2,
-            totalAmount: 55700,
-            thumbnail: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=100&q=80",
-        },
-    ];
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat("ko-KR", {

@@ -1,14 +1,38 @@
 import { Link } from '@inertiajs/react';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
+import { Badge } from '@/Components/ui/badge';
 import { ShoppingCart, Search, User, Menu, Smile } from 'lucide-react';
 import { User as UserType } from '@/types';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface HeaderProps {
     user?: UserType;
 }
 
 export default function Header({ user }: HeaderProps) {
+    const [cartSummary, setCartSummary] = useState({ totalItems: 0, total: 0 });
+
+    useEffect(() => {
+        // Fetch cart summary on mount and when user changes
+        const fetchCartSummary = async () => {
+            try {
+                const response = await axios.get('/api/cart/summary');
+                setCartSummary(response.data);
+            } catch (error) {
+                console.error('Failed to fetch cart summary:', error);
+            }
+        };
+
+        fetchCartSummary();
+
+        // Refresh cart summary every 30 seconds
+        const interval = setInterval(fetchCartSummary, 30000);
+
+        return () => clearInterval(interval);
+    }, [user]);
+
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             {/* Top Bar */}
@@ -50,14 +74,24 @@ export default function Header({ user }: HeaderProps) {
 
                     {/* Right Actions */}
                     <div className="flex items-center gap-2">
+                        {/* Cart Button (visible for both logged in and guest users) */}
+                        <Button variant="ghost" size="icon" asChild className="relative">
+                            <Link href="/cart">
+                                <ShoppingCart className="h-5 w-5" />
+                                {cartSummary.totalItems > 0 && (
+                                    <Badge
+                                        variant="destructive"
+                                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                                    >
+                                        {cartSummary.totalItems}
+                                    </Badge>
+                                )}
+                                <span className="sr-only">장바구니</span>
+                            </Link>
+                        </Button>
+
                         {user ? (
                             <>
-                                <Button variant="ghost" size="icon" asChild>
-                                    <Link href="/cart">
-                                        <ShoppingCart className="h-5 w-5" />
-                                        <span className="sr-only">장바구니</span>
-                                    </Link>
-                                </Button>
                                 <Button variant="ghost" asChild>
                                     <Link href="/mypage">
                                         <User className="h-5 w-5 mr-2" />

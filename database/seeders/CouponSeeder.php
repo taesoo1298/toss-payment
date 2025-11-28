@@ -62,7 +62,7 @@ class CouponSeeder extends Seeder
                 'discount_type' => 'fixed',
                 'discount_value' => 3000,
                 'min_purchase_amount' => 15000,
-                'applicable_categories' => json_encode(['치약']),
+                'applicable_categories' => ['치약'],
                 'usage_count' => 45,
                 'valid_from' => Carbon::now()->subDays(10),
                 'valid_until' => Carbon::now()->addDays(20),

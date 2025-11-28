@@ -15,8 +15,12 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user()?->isAdmin()) {
-            abort(403, 'Unauthorized access to admin area.');
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', '로그인이 필요합니다.');
+        }
+
+        if (!$request->user()->isAdmin()) {
+            abort(403, '관리자 권한이 필요합니다.');
         }
 
         return $next($request);

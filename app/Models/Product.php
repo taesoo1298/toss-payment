@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -42,6 +43,7 @@ class Product extends Model
         // 특징 태그
         'features',
         'target_audience',
+        'keywords',
 
         // 평점 및 리뷰
         'rating',
@@ -94,10 +96,27 @@ class Product extends Model
         'is_quasi_drug' => 'boolean',
         'features' => 'array',
         'target_audience' => 'array',
+        'keywords' => 'array',
         'images' => 'array',
         'dimensions' => 'array',
         'published_at' => 'datetime',
     ];
+
+    /**
+     * 카테고리 관계
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ProductCategory::class, 'category_id');
+    }
+
+    /**
+     * 리뷰 관계
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class)->orderBy('created_at', 'desc');
+    }
 
     /**
      * 재고 변경 이력

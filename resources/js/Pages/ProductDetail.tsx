@@ -30,11 +30,7 @@ import {
     Sparkles,
 } from "lucide-react";
 import { useState } from "react";
-
-interface ProductDetailProps extends PageProps {
-    product: Product;
-    relatedProducts: Product[];
-}
+import axios from "axios";
 
 interface Review {
     id: number;
@@ -46,10 +42,28 @@ interface Review {
     verified: boolean;
 }
 
+interface Settings {
+    shippingPolicy: string;
+    returnPolicy: string;
+    exchangePolicy: string;
+    shippingCost: number;
+    freeShippingThreshold: number;
+    pointRate: number;
+}
+
+interface ProductDetailProps extends PageProps {
+    product: Product;
+    relatedProducts: Product[];
+    reviews?: Review[];
+    settings?: Settings;
+}
+
 export default function ProductDetail({
     auth,
     product,
     relatedProducts,
+    reviews = [],
+    settings,
 }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -58,72 +72,10 @@ export default function ProductDetail({
     const [reviewContent, setReviewContent] = useState("");
     const [reviewImages, setReviewImages] = useState<string[]>([]);
 
-    // Mock product data (실제로는 백엔드에서 받아옴)
-    const mockProduct: Product = product || {
-        id: 1,
-        name: "Dr.Smile 미백 치약 프로",
-        description: "치과 미백 성분으로 누런 치아를 하얗게! 민감한 치아도 OK",
-        price: 18900,
-        originalPrice: 25000,
-        image: "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=800&q=80",
-        category: "미백케어",
-        badge: "BEST",
-        rating: 4.8,
-        reviewCount: 2345,
-    };
-
-    const mockRelatedProducts: Product[] = relatedProducts || [
-        {
-            id: 2,
-            name: "Dr.Smile 잇몸케어 치약",
-            description: "출혈과 염증을 완화하는 프로폴리스 함유",
-            price: 16900,
-            originalPrice: 22000,
-            image: "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=500&q=80",
-            category: "잇몸케어",
-            rating: 4.9,
-            reviewCount: 1876,
-        },
-        {
-            id: 3,
-            name: "Dr.Smile 민감치아 전용",
-            description: "시린이 증상 완화, 질산칼륨 함유",
-            price: 17900,
-            image: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=500&q=80",
-            category: "민감케어",
-            rating: 4.7,
-            reviewCount: 1432,
-        },
-        {
-            id: 6,
-            name: "Dr.Smile 올인원 토탈케어",
-            description: "미백+잇몸+충치예방을 한번에!",
-            price: 19900,
-            originalPrice: 26000,
-            image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=500&q=80",
-            category: "토탈케어",
-            rating: 4.9,
-            reviewCount: 2134,
-        },
-        {
-            id: 8,
-            name: "Dr.Smile 선물세트 프리미엄",
-            description: "베스트 3종 + 칫솔 세트",
-            price: 49900,
-            originalPrice: 65000,
-            image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&q=80",
-            category: "선물세트",
-            rating: 5.0,
-            reviewCount: 892,
-        },
-    ];
-
-    const productImages = [
-        mockProduct.image,
-        "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=800&q=80",
-        "https://images.unsplash.com/photo-1609840114035-3c981407e31f?w=800&q=80",
-        "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=800&q=80",
-    ];
+    // 상품 이미지 배열
+    const productImages = product?.images && product.images.length > 0
+        ? [product.image, ...product.images]
+        : [product.image || "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=800&q=80"];
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat("ko-KR", {
@@ -132,10 +84,10 @@ export default function ProductDetail({
         }).format(price);
     };
 
-    const discountPercentage = mockProduct.originalPrice
+    const discountPercentage = product?.originalPrice
         ? Math.round(
-              ((mockProduct.originalPrice - mockProduct.price) /
-                  mockProduct.originalPrice) *
+              ((product.originalPrice - product.price) /
+                  product.originalPrice) *
                   100
           )
         : 0;
@@ -144,48 +96,26 @@ export default function ProductDetail({
         setQuantity(Math.max(1, quantity + delta));
     };
 
-    const handleAddToCart = () => {
-        // 장바구니 추가 로직
-        alert(`${mockProduct.name} ${quantity}개가 장바구니에 담겼습니다.`);
-    };
+    const handleAddToCart = async () => {
+        try {
+            await axios.post("/api/cart/items", {
+                product_id: product.id,
+                quantity: quantity,
+            });
 
-    // Mock reviews data
-    const mockReviews: Review[] = [
-        {
-            id: 1,
-            userName: "김*연",
-            rating: 5,
-            date: "2025-10-25",
-            content:
-                "정말 효과가 좋아요! 일주일 사용했는데 이미 치아가 밝아진 느낌이에요. 민감한 치아인데도 전혀 시리지 않아서 좋습니다.",
-            images: [
-                "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=200&q=80",
-                "https://images.unsplash.com/photo-1609840114035-3c981407e31f?w=200&q=80",
-            ],
-            verified: true,
-        },
-        {
-            id: 2,
-            userName: "이*수",
-            rating: 4,
-            date: "2025-10-20",
-            content:
-                "미백 효과는 확실히 있는 것 같아요. 다만 가격이 조금 비싼 편이라 별 하나 뺐습니다. 그래도 재구매 의향 있습니다!",
-            verified: true,
-        },
-        {
-            id: 3,
-            userName: "박*민",
-            rating: 5,
-            date: "2025-10-15",
-            content:
-                "치과의사가 만든 제품이라 믿고 샀는데 역시 실망시키지 않네요. 향도 좋고 거품도 적당해요. 강추합니다!",
-            images: [
-                "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=200&q=80",
-            ],
-            verified: true,
-        },
-    ];
+            // Success: show confirmation and ask if user wants to go to cart
+            const goToCart = confirm(
+                `${product.name} ${quantity}개가 장바구니에 담겼습니다.\n\n장바구니로 이동하시겠습니까?`
+            );
+
+            if (goToCart) {
+                router.visit("/cart");
+            }
+        } catch (error: any) {
+            const message = error.response?.data?.message || "장바구니 추가에 실패했습니다.";
+            alert(message);
+        }
+    };
 
     const handleSubmitReview = () => {
         if (!reviewContent.trim()) {
@@ -225,9 +155,9 @@ export default function ProductDetail({
         router.visit("/checkout", {
             method: "get",
             data: {
-                productId: mockProduct.id,
-                productName: mockProduct.name,
-                price: mockProduct.price,
+                productId: product.id,
+                productName: product.name,
+                price: product.price,
                 quantity: quantity,
             },
         });
@@ -235,7 +165,7 @@ export default function ProductDetail({
 
     return (
         <>
-            <Head title={mockProduct.name} />
+            <Head title={product.name} />
 
             <div className="min-h-screen bg-background">
                 <Header user={auth.user} />
@@ -248,14 +178,14 @@ export default function ProductDetail({
                         </Link>
                         <span>/</span>
                         <Link
-                            href={`/category/${mockProduct.category}`}
+                            href={`/category/${product.category}`}
                             className="hover:text-primary"
                         >
-                            {mockProduct.category}
+                            {product.category}
                         </Link>
                         <span>/</span>
                         <span className="text-foreground">
-                            {mockProduct.name}
+                            {product.name}
                         </span>
                     </div>
 
@@ -265,7 +195,7 @@ export default function ProductDetail({
                             <Card className="overflow-hidden mb-4 sticky top-24">
                                 <img
                                     src={productImages[selectedImage]}
-                                    alt={mockProduct.name}
+                                    alt={product.name}
                                     className="w-full h-[500px] object-cover"
                                 />
                             </Card>
@@ -282,7 +212,7 @@ export default function ProductDetail({
                                     >
                                         <img
                                             src={img}
-                                            alt={`${mockProduct.name} ${
+                                            alt={`${product.name} ${
                                                 index + 1
                                             }`}
                                             className="w-full aspect-square object-cover"
@@ -296,53 +226,37 @@ export default function ProductDetail({
                         <div className="flex-1 lg:w-[500px]">
                             {/* 상품명 */}
                             <h1 className="text-2xl font-bold mb-3">
-                                {mockProduct.name}
+                                {product.name}
                             </h1>
 
                             {/* 키워드 */}
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                <span className="text-sm text-primary">
-                                    #치과의사개발
-                                </span>
-                                <span className="text-sm text-primary">
-                                    #임상실험
-                                </span>
-                                <span className="text-sm text-primary">
-                                    #천연성분
-                                </span>
-                                <span className="text-sm text-primary">
-                                    #미백효과
-                                </span>
-                            </div>
+                            {product.keywords && product.keywords.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {product.keywords.map((keyword, idx) => (
+                                        <span key={idx} className="text-sm text-primary">
+                                            #{keyword}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
 
                             {/* 특징 3개 */}
-                            <div className="bg-muted/50 rounded-lg p-4 mb-4">
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                                        <span>
-                                            대학병원 임상실험으로 검증된 미백
-                                            효과
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                                        <span>
-                                            95% 천연 유래 성분, 유해물질 무첨가
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                                        <span>
-                                            민감한 치아에도 자극 없이 사용 가능
-                                        </span>
+                            {product.features && product.features.length > 0 && (
+                                <div className="bg-muted/50 rounded-lg p-4 mb-4">
+                                    <div className="space-y-2 text-sm">
+                                        {product.features.map((feature, idx) => (
+                                            <div key={idx} className="flex items-center gap-2">
+                                                <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                                                <span>{feature}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* 가격 정보 */}
                             <div className="border-t border-b py-4 mb-4">
-                                {mockProduct.originalPrice && (
+                                {product.originalPrice && (
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm text-muted-foreground">
                                             할인율
@@ -358,8 +272,8 @@ export default function ProductDetail({
                                     </span>
                                     <span className="text-sm text-muted-foreground line-through">
                                         {formatPrice(
-                                            mockProduct.originalPrice ||
-                                                mockProduct.price
+                                            product.originalPrice ||
+                                                product.price
                                         )}
                                     </span>
                                 </div>
@@ -368,7 +282,7 @@ export default function ProductDetail({
                                         판매가
                                     </span>
                                     <span className="text-2xl font-bold text-primary">
-                                        {formatPrice(mockProduct.price)}
+                                        {formatPrice(product.price)}
                                     </span>
                                 </div>
                             </div>
@@ -380,7 +294,9 @@ export default function ProductDetail({
                                         배송
                                     </span>
                                     <span className="font-medium">
-                                        무료배송
+                                        {settings && settings.freeShippingThreshold > 0
+                                            ? `${(settings.freeShippingThreshold / 1000).toFixed(0)}만원 이상 무료배송`
+                                            : "무료배송"}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -396,7 +312,7 @@ export default function ProductDetail({
                                         배송비
                                     </span>
                                     <span className="font-medium">
-                                        3만원 이상 무료 / 3만원 미만 3,000원
+                                        {settings && `${(settings.freeShippingThreshold / 10000).toFixed(0)}만원 이상 무료 / ${(settings.freeShippingThreshold / 10000).toFixed(0)}만원 미만 ${settings.shippingCost.toLocaleString()}원`}
                                     </span>
                                 </div>
                             </div>
@@ -409,9 +325,9 @@ export default function ProductDetail({
                                     </span>
                                     <span className="text-amber-900 font-bold">
                                         {Math.floor(
-                                            mockProduct.price * 0.01
+                                            product.price * (settings?.pointRate ?? 1) / 100
                                         ).toLocaleString()}
-                                        원 (1%)
+                                        원 ({settings?.pointRate ?? 1}%)
                                     </span>
                                 </div>
                             </div>
@@ -465,7 +381,7 @@ export default function ProductDetail({
                                     <div className="text-right">
                                         <div className="text-2xl font-bold text-primary">
                                             {formatPrice(
-                                                mockProduct.price * quantity
+                                                product.price * quantity
                                             )}
                                         </div>
                                         <div className="text-xs text-muted-foreground">
@@ -533,149 +449,32 @@ export default function ProductDetail({
                                         value="reviews"
                                         className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
                                     >
-                                        리뷰 ({mockProduct.reviewCount})
+                                        리뷰 ({product.reviewCount})
                                     </TabsTrigger>
                                 </TabsList>
 
                                 <TabsContent value="details" className="p-6">
-                                    <div className="prose max-w-none">
-                                        <h3 className="text-2xl font-bold mb-4">
-                                            제품 상세정보
-                                        </h3>
-                                        <p className="mb-4">
-                                            Dr.Smile 미백 치약 프로는 20년
-                                            임상경험을 가진 치과의사가 직접
-                                            개발한 전문 미백 치약입니다. 일반
-                                            미백 치약과 달리 치아를 손상시키지
-                                            않으면서도 효과적으로 미백 효과를
-                                            제공합니다.
-                                        </p>
-                                        <h4 className="text-xl font-semibold mb-3">
-                                            주요 특징
-                                        </h4>
-                                        <ul className="list-disc pl-6 space-y-2 mb-4">
-                                            <li>
-                                                치과에서 사용하는 미백 성분 함유
-                                            </li>
-                                            <li>
-                                                민감한 치아에도 자극 없이 사용
-                                                가능
-                                            </li>
-                                            <li>95% 천연 유래 성분으로 안전</li>
-                                            <li>식약처 인증 의약외품</li>
-                                            <li>대학병원 임상실험 완료</li>
-                                        </ul>
-                                        <h4 className="text-xl font-semibold mb-3">
-                                            사용 대상
-                                        </h4>
-                                        <ul className="list-disc pl-6 space-y-2">
-                                            <li>
-                                                커피, 차, 담배로 인한 치아
-                                                착색이 신경쓰이시는 분
-                                            </li>
-                                            <li>
-                                                치아 미백을 원하지만 민감한 치아
-                                                때문에 망설이시는 분
-                                            </li>
-                                            <li>
-                                                안전한 성분의 치약을 찾으시는 분
-                                            </li>
-                                            <li>
-                                                전문가가 만든 프리미엄 치약을
-                                                원하시는 분
-                                            </li>
-                                        </ul>
-                                    </div>
+                                    <div
+                                        className="prose max-w-none"
+                                        dangerouslySetInnerHTML={{ __html: product.description || '상세정보가 준비 중입니다.' }}
+                                    />
                                 </TabsContent>
 
                                 <TabsContent
                                     value="ingredients"
                                     className="p-6"
                                 >
-                                    <div className="prose max-w-none">
-                                        <h3 className="text-2xl font-bold mb-4">
-                                            성분 정보
-                                        </h3>
-                                        <div className="bg-muted/50 rounded-lg p-4 mb-4">
-                                            <h4 className="font-semibold mb-2">
-                                                주요 성분
-                                            </h4>
-                                            <ul className="space-y-2">
-                                                <li>
-                                                    <strong>
-                                                        수산화인회석
-                                                    </strong>{" "}
-                                                    - 자연 미백 효과
-                                                </li>
-                                                <li>
-                                                    <strong>질산칼륨</strong> -
-                                                    시린이 완화
-                                                </li>
-                                                <li>
-                                                    <strong>자일리톨</strong> -
-                                                    충치 예방
-                                                </li>
-                                                <li>
-                                                    <strong>
-                                                        프로폴리스 추출물
-                                                    </strong>{" "}
-                                                    - 잇몸 건강
-                                                </li>
-                                                <li>
-                                                    <strong>
-                                                        알로에베라 추출물
-                                                    </strong>{" "}
-                                                    - 구강 진정
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <h4 className="font-semibold mb-2">
-                                            무첨가
-                                        </h4>
-                                        <p className="text-muted-foreground">
-                                            파라벤, 트리클로산, 인공색소,
-                                            합성향료, SLS, SLES 무첨가
-                                        </p>
-                                    </div>
+                                    <div
+                                        className="prose max-w-none"
+                                        dangerouslySetInnerHTML={{ __html: product.ingredients || '성분 정보가 준비 중입니다.' }}
+                                    />
                                 </TabsContent>
 
                                 <TabsContent value="usage" className="p-6">
-                                    <div className="prose max-w-none">
-                                        <h3 className="text-2xl font-bold mb-4">
-                                            사용 방법
-                                        </h3>
-                                        <ol className="list-decimal pl-6 space-y-3">
-                                            <li>
-                                                칫솔에 적당량(완두콩 크기)을
-                                                짜줍니다.
-                                            </li>
-                                            <li>
-                                                치아와 잇몸을 부드럽게 2-3분간
-                                                닦아줍니다.
-                                            </li>
-                                            <li>
-                                                깨끗한 물로 충분히 헹궈냅니다.
-                                            </li>
-                                            <li>
-                                                하루 3회, 식후 사용을
-                                                권장합니다.
-                                            </li>
-                                        </ol>
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-                                            <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                                <Smile className="h-5 w-5 text-primary" />
-                                                치과의사 TIP
-                                            </h4>
-                                            <p className="text-sm">
-                                                미백 효과를 극대화하려면 칫솔질
-                                                후 30분간 음식물 섭취를
-                                                자제해주세요. 또한 색소가 강한
-                                                음식(커피, 홍차, 와인) 섭취
-                                                후에는 바로 양치하는 것이
-                                                좋습니다.
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <div
+                                        className="prose max-w-none"
+                                        dangerouslySetInnerHTML={{ __html: product.usage_instructions || product.usageInstructions || '사용 방법 정보가 준비 중입니다.' }}
+                                    />
                                 </TabsContent>
 
                                 <TabsContent value="reviews" className="p-6">
@@ -683,7 +482,7 @@ export default function ProductDetail({
                                         <div className="flex items-center justify-between mb-6">
                                             <div>
                                                 <div className="text-4xl font-bold mb-2">
-                                                    {mockProduct.rating}
+                                                    {product.rating}
                                                 </div>
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <div className="flex">
@@ -694,7 +493,7 @@ export default function ProductDetail({
                                                                     className={`h-5 w-5 ${
                                                                         i <
                                                                         Math.floor(
-                                                                            mockProduct.rating!
+                                                                            product.rating!
                                                                         )
                                                                             ? "fill-yellow-400 text-yellow-400"
                                                                             : "text-gray-300"
@@ -705,7 +504,7 @@ export default function ProductDetail({
                                                     </div>
                                                 </div>
                                                 <div className="text-sm text-muted-foreground">
-                                                    {mockProduct.reviewCount}
+                                                    {product.reviewCount}
                                                     개의 리뷰
                                                 </div>
                                             </div>
@@ -719,7 +518,7 @@ export default function ProductDetail({
                                         </div>
 
                                         {/* Reviews List */}
-                                        {mockReviews.map((review) => (
+                                        {reviews.map((review) => (
                                             <Card key={review.id}>
                                                 <CardContent className="p-6">
                                                     <div className="flex items-center justify-between mb-3">
@@ -817,7 +616,7 @@ export default function ProductDetail({
                                 이런 상품은 어떠세요?
                             </h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {mockRelatedProducts.map((product) => (
+                                {relatedProducts.map((product) => (
                                     <ProductCard
                                         key={product.id}
                                         product={product}
