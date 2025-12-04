@@ -278,4 +278,56 @@ Route::prefix('customer-center')->name('customer-center.')->group(function () {
     });
 });
 
+// Legal Pages
+Route::prefix('legal')->name('legal.')->group(function () {
+    Route::get('/terms', function () {
+        return Inertia::render('Legal/TermsOfService');
+    })->name('terms');
+
+    Route::get('/privacy', function () {
+        return Inertia::render('Legal/PrivacyPolicy');
+    })->name('privacy');
+});
+
+// Info Pages
+Route::prefix('info')->name('info.')->group(function () {
+    Route::get('/return-policy', function () {
+        return Inertia::render('Info/ReturnPolicy');
+    })->name('return-policy');
+
+    Route::get('/subscription', function () {
+        return Inertia::render('Info/SubscriptionGuide');
+    })->name('subscription');
+
+    Route::get('/partnership', function () {
+        return Inertia::render('Info/Partnership');
+    })->name('partnership');
+});
+
+// About Pages
+Route::prefix('about')->name('about.')->group(function () {
+    Route::get('/brand', function () {
+        return Inertia::render('About/BrandStory');
+    })->name('brand');
+
+    Route::get('/dentist', function () {
+        return Inertia::render('About/Dentist');
+    })->name('dentist');
+
+    Route::get('/clinical', function () {
+        return Inertia::render('About/ClinicalTest');
+    })->name('clinical');
+});
+
+// Support Pages
+Route::prefix('support')->name('support.')->group(function () {
+    Route::get('/consultation', function () {
+        return Inertia::render('Support/Consultation');
+    })->name('consultation');
+
+    Route::get('/delivery', function () {
+        return Inertia::render('Support/DeliveryTracking');
+    })->name('delivery');
+});
+
 require __DIR__.'/auth.php';

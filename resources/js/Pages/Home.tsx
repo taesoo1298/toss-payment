@@ -1,6 +1,7 @@
 import { Head } from "@inertiajs/react";
 import { PageProps, Product } from "@/types";
 import Header from "@/Components/Header";
+import Footer from "@/Components/Footer";
 import HeroBanner from "@/Components/HeroBanner";
 import ProductCard from "@/Components/ProductCard";
 import {
@@ -297,59 +298,7 @@ export default function Home({
                 </section>
 
                 {/* Footer */}
-                <footer className="bg-background border-t py-12">
-                    <div className="container mx-auto px-4">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                            <div>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Smile className="h-6 w-6 text-primary" />
-                                    <h3 className="font-bold text-lg">
-                                        Dr.Smile
-                                    </h3>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                    치과의사가 만든 프리미엄 치약
-                                    <br />
-                                    건강한 미소를 위한 첫걸음
-                                </p>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold mb-4">고객지원</h4>
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li>공지사항</li>
-                                    <li>자주 묻는 질문</li>
-                                    <li>치과의사 상담</li>
-                                    <li>배송 조회</li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold mb-4">이용안내</h4>
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li>이용약관</li>
-                                    <li>개인정보처리방침</li>
-                                    <li>반품/교환 정책</li>
-                                    <li>정기배송 안내</li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold mb-4">Dr.Smile</h4>
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li>브랜드 스토리</li>
-                                    <li>치과의사 소개</li>
-                                    <li>임상실험 결과</li>
-                                    <li>제휴문의</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-                            <p className="mb-2">
-                                상호명: Dr.Smile | 대표: 김민수 |
-                                사업자등록번호: 123-45-67890
-                            </p>
-                            <p>&copy; 2025 Dr.Smile. All rights reserved.</p>
-                        </div>
-                    </div>
-                </footer>
+                <Footer />
             </div>
         </>
     );
