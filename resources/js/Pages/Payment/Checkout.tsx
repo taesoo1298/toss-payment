@@ -53,12 +53,14 @@ interface Address {
 interface CheckoutProps extends PageProps {
     items?: OrderItem[];
     totalAmount?: number;
+    availableCoupons?: Coupon[];
+    savedAddresses?: Address[];
 }
 
-export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
+export default function Checkout({ auth, items, totalAmount, availableCoupons: initialCoupons, savedAddresses: initialAddresses }: CheckoutProps) {
     const user = auth.user;
 
-    // Mock order items
+    // Mock order items (fallback if backend data is not available)
     const mockItems: OrderItem[] = items || [
         {
             id: 1,
@@ -76,8 +78,8 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
         },
     ];
 
-    // Mock available coupons
-    const availableCoupons: Coupon[] = [
+    // Mock available coupons (fallback if backend data is not available)
+    const mockCoupons: Coupon[] = [
         {
             id: "1",
             code: "WELCOME10",
@@ -112,8 +114,10 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
         },
     ];
 
-    // Mock saved addresses
-    const savedAddresses: Address[] = [
+    const availableCoupons = initialCoupons || mockCoupons;
+
+    // Mock saved addresses (fallback if backend data is not available)
+    const mockAddresses: Address[] = [
         {
             id: "1",
             name: "우리집",
@@ -137,6 +141,8 @@ export default function Checkout({ auth, items, totalAmount }: CheckoutProps) {
             type: "office",
         },
     ];
+
+    const savedAddresses = initialAddresses || mockAddresses;
 
     const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
     const [couponDialogOpen, setCouponDialogOpen] = useState(false);

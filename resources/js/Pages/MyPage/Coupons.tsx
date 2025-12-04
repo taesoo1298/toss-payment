@@ -30,10 +30,14 @@ interface Coupon {
     isExpired: boolean;
 }
 
-export default function Coupons({ auth }: PageProps) {
+interface CouponsProps extends PageProps {
+    coupons?: Coupon[];
+}
+
+export default function Coupons({ auth, coupons: initialCoupons }: CouponsProps) {
     const user = auth.user!;
 
-    // Mock coupon data
+    // Mock coupon data (fallback if backend data is not available)
     const mockCoupons: Coupon[] = [
         {
             id: "1",
@@ -107,9 +111,12 @@ export default function Coupons({ auth }: PageProps) {
         type: "success" | "error";
     } | null>(null);
 
-    const availableCoupons = mockCoupons.filter((c) => !c.isUsed && !c.isExpired);
-    const usedCoupons = mockCoupons.filter((c) => c.isUsed);
-    const expiredCoupons = mockCoupons.filter((c) => c.isExpired && !c.isUsed);
+    // Use backend data if available, otherwise use mock data
+    const couponList = initialCoupons || mockCoupons;
+
+    const availableCoupons = couponList.filter((c) => !c.isUsed && !c.isExpired);
+    const usedCoupons = couponList.filter((c) => c.isUsed);
+    const expiredCoupons = couponList.filter((c) => c.isExpired && !c.isUsed);
 
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat("ko-KR", {

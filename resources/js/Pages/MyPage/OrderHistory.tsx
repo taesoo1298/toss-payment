@@ -41,10 +41,14 @@ interface Order {
     trackingNumber?: string;
 }
 
-export default function OrderHistory({ auth }: PageProps) {
+interface OrderHistoryProps extends PageProps {
+    orders?: Order[];
+}
+
+export default function OrderHistory({ auth, orders }: OrderHistoryProps) {
     const user = auth.user!;
 
-    // Mock order data
+    // Mock order data (fallback if backend data is not available)
     const mockOrders: Order[] = [
         {
             id: "1",
@@ -196,9 +200,12 @@ export default function OrderHistory({ auth }: PageProps) {
         }).format(date);
     };
 
+    // Use backend data if available, otherwise use mock data
+    const orderList = orders || mockOrders;
+
     const filterOrders = (status?: Order["status"] | "all") => {
-        if (!status || status === "all") return mockOrders;
-        return mockOrders.filter((order) => order.status === status);
+        if (!status || status === "all") return orderList;
+        return orderList.filter((order) => order.status === status);
     };
 
     const getOrderCount = (status?: Order["status"] | "all") => {
@@ -305,7 +312,7 @@ export default function OrderHistory({ auth }: PageProps) {
                     {/* Header */}
                     <div>
                         <h2 className="text-2xl font-bold mb-1">주문 내역</h2>
-                        <p className="text-muted-foreground">총 {mockOrders.length}건의 주문 내역이 있습니다</p>
+                        <p className="text-muted-foreground">총 {orderList.length}건의 주문 내역이 있습니다</p>
                     </div>
 
                     {/* Order Status Summary */}
@@ -356,7 +363,7 @@ export default function OrderHistory({ auth }: PageProps) {
                             <Tabs defaultValue="all" onValueChange={setSelectedTab}>
                                 <TabsList className="grid w-full grid-cols-6">
                                     <TabsTrigger value="all">
-                                        전체 ({mockOrders.length})
+                                        전체 ({orderList.length})
                                     </TabsTrigger>
                                     <TabsTrigger value="preparing">
                                         준비중 ({getOrderCount("preparing")})

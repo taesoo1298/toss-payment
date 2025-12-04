@@ -24,7 +24,7 @@ class Product extends Model
         'cost_price',
 
         // 분류
-        'category',
+        'category_id',
         'brand',
 
         // 상세 정보

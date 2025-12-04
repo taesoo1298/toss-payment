@@ -20,9 +20,32 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    // Get featured products (best sellers)
+    $featuredProducts = \App\Models\Product::query()
+        ->active()
+        ->where('is_best_seller', true)
+        ->with('category')
+        ->orderBy('sold_count', 'desc')
+        ->limit(8)
+        ->get()
+        ->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'description' => $product->short_description ?? $product->description,
+                'price' => (int) $product->price,
+                'originalPrice' => $product->original_price ? (int) $product->original_price : null,
+                'image' => $product->main_image ?? 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=500&q=80',
+                'category' => $product->category->name ?? '전체상품',
+                'badge' => $product->is_best_seller ? 'BEST' : ($product->is_new ? 'NEW' : null),
+                'rating' => (float) $product->rating,
+                'reviewCount' => $product->review_count,
+            ];
+        });
+
     return Inertia::render('Home', [
-        // 'featuredProducts' => [],
-        // 'newProducts' => [],
+        'featuredProducts' => $featuredProducts,
     ]);
 })->name('home');
 
@@ -33,7 +56,7 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/category/{category}', [ProductController::class, 'index'])->name('category.show');
 
 // Product detail page
-Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
 
 // Cart page and API
 Route::get('/cart', [CartController::class, 'index'])->name('cart');
@@ -123,8 +146,75 @@ Route::middleware('auth')->group(function () {
 });
 
 // Checkout page
-Route::get('/checkout', function () {
-    return Inertia::render('Payment/Checkout');
+Route::get('/checkout', function (Illuminate\Http\Request $request) {
+    $user = $request->user();
+
+    // Get cart items
+    $cartItems = \App\Models\CartItem::with('product')
+        ->whereHas('cart', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id' => $item->product_id,
+                'name' => $item->product->name,
+                'price' => (int) $item->product->price,
+                'quantity' => $item->quantity,
+                'image' => $item->product->main_image ?? 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=100&q=80',
+            ];
+        });
+
+    // Get available coupons
+    $availableCoupons = \App\Models\UserCoupon::with('coupon')
+        ->where('user_id', $user->id)
+        ->where('status', 'available')
+        ->whereHas('coupon', function ($query) {
+            $query->where('is_active', true)
+                ->where(function ($q) {
+                    $q->whereNull('valid_until')
+                      ->orWhere('valid_until', '>=', now());
+                });
+        })
+        ->get()
+        ->map(function ($userCoupon) {
+            $coupon = $userCoupon->coupon;
+            return [
+                'id' => (string) $userCoupon->id,
+                'code' => $coupon->code,
+                'name' => $coupon->name,
+                'description' => $coupon->description,
+                'discountType' => $coupon->discount_type,
+                'discountValue' => (float) $coupon->discount_value,
+                'minPurchaseAmount' => (float) $coupon->min_purchase_amount,
+                'maxDiscountAmount' => $coupon->max_discount_amount ? (float) $coupon->max_discount_amount : null,
+            ];
+        });
+
+    // Get saved addresses
+    $savedAddresses = \App\Models\Address::where('user_id', $user->id)
+        ->orderBy('is_default', 'desc')
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->map(function ($address) {
+            return [
+                'id' => (string) $address->id,
+                'name' => $address->name,
+                'recipient' => $address->recipient,
+                'phone' => $address->phone,
+                'postalCode' => $address->postal_code,
+                'address' => $address->address,
+                'addressDetail' => $address->address_detail,
+                'isDefault' => $address->is_default,
+                'type' => $address->type,
+            ];
+        });
+
+    return Inertia::render('Payment/Checkout', [
+        'items' => $cartItems,
+        'availableCoupons' => $availableCoupons,
+        'savedAddresses' => $savedAddresses,
+    ]);
 })->middleware('auth')->name('checkout');
 
 // Order complete page

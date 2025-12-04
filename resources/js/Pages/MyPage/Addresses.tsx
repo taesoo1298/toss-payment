@@ -31,10 +31,14 @@ interface Address {
     type: "home" | "office" | "etc";
 }
 
-export default function Addresses({ auth }: PageProps) {
+interface AddressesProps extends PageProps {
+    addresses?: Address[];
+}
+
+export default function Addresses({ auth, addresses: initialAddresses }: AddressesProps) {
     const user = auth.user!;
 
-    // Mock address data
+    // Mock address data (fallback if backend data is not available)
     const mockAddresses: Address[] = [
         {
             id: "1",
@@ -60,7 +64,7 @@ export default function Addresses({ auth }: PageProps) {
         },
     ];
 
-    const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
+    const [addresses, setAddresses] = useState<Address[]>(initialAddresses || mockAddresses);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingAddress, setEditingAddress] = useState<Address | null>(null);
     const [formData, setFormData] = useState<Partial<Address>>({

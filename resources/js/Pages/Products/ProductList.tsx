@@ -20,31 +20,39 @@ interface PaginatedProducts {
     meta: any;
 }
 
+interface Category {
+    id: string;
+    name: string;
+    count: number;
+}
+
 interface ProductListProps extends PageProps {
     category?: string;
     products?: PaginatedProducts;
+    categories?: Category[];
     filters?: {
         price_min?: number;
         price_max?: number;
         features?: string[];
         rating?: number;
+        search?: string;
         sort?: string;
     };
 }
 
-export default function ProductList({ auth, category, products }: ProductListProps) {
+export default function ProductList({ auth, category, products, categories: categoriesFromBackend }: ProductListProps) {
     const user = auth.user;
 
-    // 카테고리 정의
-    const categories = [
+    // 카테고리 정의 (백엔드에서 받은 데이터 사용, 없으면 mock 데이터 사용)
+    const categories = categoriesFromBackend || [
         { id: "all", name: "전체상품", count: 24 },
         { id: "whitening", name: "미백케어", count: 8 },
-        { id: "gum", name: "잇몸케어", count: 6 },
+        { id: "gum-care", name: "잇몸케어", count: 6 },
         { id: "sensitive", name: "민감치아", count: 5 },
         { id: "kids", name: "어린이용", count: 4 },
         { id: "herbal", name: "한방치약", count: 3 },
-        { id: "total", name: "토탈케어", count: 4 },
-        { id: "gift", name: "선물세트", count: 2 },
+        { id: "total-care", name: "토탈케어", count: 4 },
+        { id: "gift-sets", name: "선물세트", count: 2 },
     ];
 
     // 백엔드에서 받은 상품 데이터 (없으면 mock 데이터 사용)

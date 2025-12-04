@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,7 +15,7 @@ class ProductController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = Product::query()->active();
+        $query = Product::query()->with('category')->active();
 
         // 카테고리 필터
         if ($request->filled('category') && $request->category !== 'all') {
@@ -56,6 +57,16 @@ class ProductController extends Controller
             $query->where('rating', '>=', $request->rating);
         }
 
+        // 검색
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('short_description', 'like', "%{$search}%");
+            });
+        }
+
         // 정렬
         $sort = $request->get('sort', 'popular');
         switch ($sort) {
@@ -95,14 +106,38 @@ class ProductController extends Controller
             ];
         });
 
+        // 카테고리 목록 (상품 수 포함)
+        $categories = ProductCategory::active()
+            ->rootCategories()
+            ->withCount(['products' => function ($query) {
+                $query->active();
+            }])
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => $category->slug,
+                    'name' => $category->name,
+                    'count' => $category->products_count,
+                ];
+            });
+
+        // "전체상품" 카테고리를 맨 앞에 추가
+        $categories->prepend([
+            'id' => 'all',
+            'name' => '전체상품',
+            'count' => Product::active()->count(),
+        ]);
+
         return Inertia::render('Products/ProductList', [
             'category' => $request->get('category', 'all'),
             'products' => $products,
+            'categories' => $categories,
             'filters' => [
                 'price_min' => $request->price_min,
                 'price_max' => $request->price_max,
                 'features' => $request->features,
                 'rating' => $request->rating,
+                'search' => $request->search,
                 'sort' => $sort,
             ],
         ]);
@@ -111,11 +146,11 @@ class ProductController extends Controller
     /**
      * 상품 상세 페이지
      */
-    public function show(string $id): Response
+    public function show(string $slug): Response
     {
         $product = Product::with(['category', 'reviews' => function ($query) {
             $query->orderBy('created_at', 'desc')->limit(20);
-        }, 'reviews.user'])->findOrFail($id);
+        }, 'reviews.user'])->where('slug', $slug)->firstOrFail();
 
         // 관련 상품 (같은 카테고리, 최대 4개)
         $relatedProducts = Product::query()

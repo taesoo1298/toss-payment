@@ -1,8 +1,15 @@
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Badge } from '@/Components/ui/badge';
-import { ShoppingCart, Search, User, Menu, Smile } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/Components/ui/dropdown-menu';
+import { ShoppingCart, Search, User, Menu, Smile, LogOut, UserCircle } from 'lucide-react';
 import { User as UserType } from '@/types';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -32,6 +39,10 @@ export default function Header({ user }: HeaderProps) {
 
         return () => clearInterval(interval);
     }, [user]);
+
+    const handleLogout = () => {
+        router.post('/logout');
+    };
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -91,14 +102,27 @@ export default function Header({ user }: HeaderProps) {
                         </Button>
 
                         {user ? (
-                            <>
-                                <Button variant="ghost" asChild>
-                                    <Link href="/mypage">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost">
                                         <User className="h-5 w-5 mr-2" />
                                         {user.name}
-                                    </Link>
-                                </Button>
-                            </>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/mypage" className="cursor-pointer w-full">
+                                            <UserCircle className="h-4 w-4 mr-2" />
+                                            마이페이지
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+                                        <LogOut className="h-4 w-4 mr-2" />
+                                        로그아웃
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         ) : (
                             <>
                                 <Button variant="ghost" asChild>
